@@ -1,0 +1,14 @@
+A
+C
+AB
+@DPTR
+DPTR
+@A+PC
+@A+DPTR
+
+Rn
+@R0
+@R1
+
+
+/num

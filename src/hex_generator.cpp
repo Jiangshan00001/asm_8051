@@ -3,7 +3,11 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <split.h>
+#include <trim.h>
+#include <assert.h>
 #include "hex_generator.h"
+
 
 std::string HByteToStr(const unsigned char mC)
 {
@@ -20,135 +24,318 @@ std::string HByteToStr(const unsigned char mC)
 	return std::string((char*)mTmpStr);
 }
 
+unsigned char HStrToByte(const unsigned char mC)
+{
+    unsigned char mTmpStr[4]={0,0,0,0};
+    ///0--F
+    if (mC<'A')
+    {
+         return (mC-'0');
+    }
+    return (mC-'A'+10);
+}
 
 std::string ByteToStr(const unsigned char mC)
 {
+    ///0x12(int)--->"12"(str)
 	unsigned a = ((mC&0xf0)>>4);
 	unsigned b = (mC&0x0f);
 
 	return HByteToStr(a) + HByteToStr(b) ;	
 }
 
+unsigned int StrToByte(std::string mC)
+{
+    ///"12"(str)--->0x12(int)
+
+    unsigned int a = HStrToByte(mC[0]);
+    unsigned int b = HStrToByte(mC[1]);
+
+    return (unsigned int)(b+a*16);
+}
+
+
+
 //: 10 1234 00 021234513F2925102724123935143734  2A
 //:1012440047413F5E5556575487520953784382812C
 //:0E125400B081B534E6B443E3BE54E0B654DDD9
 //:00000001FF
 
-///¸ñÊ½ËµÃ÷ : Ã¿Ò»ĞĞÇ°Îª":"
-/// 1×Ö½ÚÎªÊı¾İ¸öÊı"10"
-/// 2×Ö½ÚÎªÊı¾İÆğÊ¼µØÖ·"1234"
-/// 1×Ö½ÚÎªÊı¾İÀàĞÍ£¬ 00---Êı¾İ¼ÇÂ¼£¬01--ÎÄ¼ş½áÊø¼ÇÂ¼
-/// 1×Ö½ÚÎª Ğ£ÑéÂë
+///æ ¼å¼è¯´æ˜ : æ¯ä¸€è¡Œå‰ä¸º":"
+/// 1å­—èŠ‚ä¸ºæ•°æ®ä¸ªæ•°"10"
+/// 2å­—èŠ‚ä¸ºæ•°æ®èµ·å§‹åœ°å€"1234"
+/// 1å­—èŠ‚ä¸ºæ•°æ®ç±»å‹ï¼Œ 00---æ•°æ®è®°å½•ï¼Œ01--æ–‡ä»¶ç»“æŸè®°å½•
+/// 1å­—èŠ‚ä¸º æ ¡éªŒç 
 
 
-int hex_test(T_HEX_TEXT_BLOCK &mBlock, std::ofstream &file_out )
+
+std::vector< unsigned int> hex_str_to_ints(std::string mstr1)
 {
-	
-	unsigned long mAddressHead;
-	unsigned long mAddress;
-	
-	mAddressHead = mAddress = mBlock.m_address;
+    std::vector< unsigned int> ret ;
 
-	///everything done. flush all to file
-	while((mAddress-mAddressHead<mBlock.m_hex_text.size()))
-	{
-		if ((mBlock.m_hex_text.size() - (mAddress-mAddressHead))>=0x10)
-		{
-			//Ğ´Èë0x10¸ö×Ö½Ú
-			file_out<<":";//ÆğÊ¼×Ö½Ú
-			file_out<<"10";//Êı¾İ¸öÊı
-			
-			file_out<<ByteToStr((mAddress>>8)) ;
-			file_out<<ByteToStr(mAddress);//µØÖ·
-			file_out<<"00";//Êı¾İÀàĞÍ
-			unsigned char mCheckByte = 0x10+((mAddress>>8)&0xff)+(mAddress&0xff);
-			for (int j=0;j<0x10;j++)
-			{
-				file_out<<ByteToStr(mBlock.m_hex_text[mAddress-mAddressHead]);//Êı¾İÀàĞÍ
-				mCheckByte += mBlock.m_hex_text[mAddress-mAddressHead];
-				mAddress++;
-			}
-			mCheckByte = -mCheckByte;
-			file_out<<ByteToStr(mCheckByte);
-			file_out<<"\n";
-		}
-		else
-		{
-			//ÓĞ¶àÉÙ×Ö½Ú£¬Ğ´¶àÉÙ×Ö½Ú
-			int mBytesLeft = mBlock.m_hex_text.size() - (mAddress-mAddressHead);
-			//Ğ´ÈëmBytesLeft¸ö×Ö½Ú
-			file_out<<":";//ÆğÊ¼×Ö½Ú
-			file_out<<ByteToStr(mBytesLeft);//Êı¾İ¸öÊı
-			
-			file_out<<ByteToStr((mAddress>>8)) ;
-			file_out<<ByteToStr(mAddress);//µØÖ·
-			file_out<<"00";//Êı¾İÀàĞÍ
-			unsigned char mCheckByte = mBytesLeft+((mAddress>>8)&0xff)+(mAddress&0xff);
-			for (int j=0;j<mBytesLeft;j++)
-			{
-				file_out<<ByteToStr(mBlock.m_hex_text[mAddress-mAddressHead]);//Êı¾İÀàĞÍ
-				mCheckByte += mBlock.m_hex_text[mAddress-mAddressHead];
-				mAddress++;
-			}
-			mCheckByte = (-mCheckByte);
-			file_out<<ByteToStr(mCheckByte);
-			file_out<<"\n";
-		}
-	}
-
-	return 0;
+    for(int i=0;i<mstr1.size();)
+    {
+        unsigned int a = StrToByte(mstr1.substr(i,2));
+        i+=2;
+        ret.push_back(a);
+    }
+    return ret;
 }
-int hex_generator(T_ASM_CONTEXT *mCtx, std::string file_name)
+
+
+std::vector<hex_block> hex_file_to_hex_data(std::string hex_file_data)
 {
-	if (mCtx->m_text_block.empty())
-	{
-		return 0;
-	}
-	
-	
-	std::ofstream file_out(file_name.c_str());
+    std::vector<std::string> lines = split(hex_file_data,"\n");
+    unsigned long line_addr = 0;
+    std::vector<hex_block> ret;
+
+    for(int i=0;i<lines.size();++i)
+    {
+        hex_block m_block;
+        std::string one_line = trim(lines[i]);
+        if(one_line.size()==0)
+        {
+            continue;
+        }
+
+        one_line=one_line.substr(1);//å»æ‰ :
+        std::vector< unsigned int> ints = hex_str_to_ints(one_line);
+
+        assert(ints.size()>3);
+
+        unsigned long data_num = ints[0];
+        unsigned long data_addr = (ints[1]<<8)+(ints[2]);
+        unsigned long data_type = ints[3];
+
+        if(data_type==1)
+        {
+            //eof
+            break;
+        }
+        m_block.m_address = data_addr + line_addr;
+        m_block.m_hex.resize(data_num);
+        for(int j=0;j<data_num;j++)
+        {
+            m_block.m_hex[j] = ints[j+4];
+        }
+        m_block.m_crc = ints[data_num+4];
+        ret.push_back(m_block);
+    }
 
 
-	std::vector<T_HEX_TEXT_BLOCK> text_block;
 
-	//////////////////////////////////////////////////////////////////////////
-	text_block = mCtx->m_text_block;//copy
-	//////////////////////////////////////////////////////////////////////////
+    ///å¯¹äºå¤šä¸ªblockï¼ŒæŸ¥çœ‹æ˜¯å¦æœ‰å¯ä»¥åˆå¹¶çš„ï¼Œå¦‚æœæœ‰ï¼Œåˆ™åˆå¹¶
+    for(int i=0;i<ret.size()-1;)
+    {
+        if(ret[i].m_address+ret[i].m_hex.size()==ret[i+1].m_address)
+        {
+            ret[i].m_hex = ret[i].m_hex + ret[i+1].m_hex;
+            ret.erase(ret.begin()+i+1);
+        }
+        else
+        {
+            i++;
+        }
+    }
 
-	//////////////////////////////////////////////////////////////////////////
-	/// skip
-	for (int i1=0;i1<text_block.size();++i1)
-	{
-		if (text_block[i1].m_hex_text.empty())
-		{
-			// no code. skip it
-			text_block.erase(text_block.begin()+i1);
-			--i1;
-		}
-	}
-	//////////////////////////////////////////////////////////////////////////
-	/// merge
-	for (int i2=1;i2<text_block.size();++i2)
-	{
-		if (text_block[i2-1].m_address+text_block[i2-1].m_hex_text.size()== text_block[i2].m_address)
-		{
-			//merge
-			text_block[i2-1].m_hex_text = text_block[i2-1].m_hex_text + text_block[i2].m_hex_text;
-			text_block.erase(text_block.begin()+i2);
-			--i2;
-		}
-	}
+    return ret;
 
-
-	//////////////////////////////////////////////////////////////////////////
-	for (int i3=0;i3<text_block.size();++i3)
-	{
-		hex_test(text_block[i3], file_out);
-	}
-
-	//file end
-	file_out<<":00000001FF"<<"\n";
-	file_out.close();
-
-	return 0;
 }
+
+
+int hex_data_to_hex_file_format(unsigned long address, std::string hex_data, std::stringstream &file_out)
+{
+    unsigned long mAddressHead;
+    unsigned long mAddress;
+
+    mAddressHead = mAddress = address;
+
+    ///everything done. flush all to file
+    while((mAddress-mAddressHead<hex_data.size()))
+    {
+        if ((hex_data.size() - (mAddress-mAddressHead))>=0x10)
+        {
+            //å†™å…¥0x10ä¸ªå­—èŠ‚
+            file_out<<":";//èµ·å§‹å­—èŠ‚
+            file_out<<"10";//æ•°æ®ä¸ªæ•°
+
+            file_out<<ByteToStr((mAddress>>8)) ;
+            file_out<<ByteToStr(mAddress);//åœ°å€
+            file_out<<"00";//æ•°æ®ç±»å‹
+            unsigned char mCheckByte = 0x10+((mAddress>>8)&0xff)+(mAddress&0xff);
+            for (int j=0;j<0x10;j++)
+            {
+                file_out<<ByteToStr(hex_data[mAddress-mAddressHead]);//æ•°æ®ç±»å‹
+                mCheckByte += hex_data[mAddress-mAddressHead];
+                mAddress++;
+            }
+            mCheckByte = -mCheckByte;
+            file_out<<ByteToStr(mCheckByte);
+            file_out<<"\n";
+        }
+        else
+        {
+            //æœ‰å¤šå°‘å­—èŠ‚ï¼Œå†™å¤šå°‘å­—èŠ‚
+            int mBytesLeft = hex_data.size() - (mAddress-mAddressHead);
+            //å†™å…¥mBytesLeftä¸ªå­—èŠ‚
+            file_out<<":";//èµ·å§‹å­—èŠ‚
+            file_out<<ByteToStr(mBytesLeft);//æ•°æ®ä¸ªæ•°
+
+            file_out<<ByteToStr((mAddress>>8)) ;
+            file_out<<ByteToStr(mAddress);//åœ°å€
+            file_out<<"00";//æ•°æ®ç±»å‹
+            unsigned char mCheckByte = mBytesLeft+((mAddress>>8)&0xff)+(mAddress&0xff);
+            for (int j=0;j<mBytesLeft;j++)
+            {
+                file_out<<ByteToStr(hex_data[mAddress-mAddressHead]);//æ•°æ®ç±»å‹
+                mCheckByte += hex_data[mAddress-mAddressHead];
+                mAddress++;
+            }
+            mCheckByte = (-mCheckByte);
+            file_out<<ByteToStr(mCheckByte);
+            file_out<<"\n";
+        }
+    }
+
+    return 0;
+}
+
+
+std::string hex_data_to_hex_file(std::vector<hex_block> hex_data)
+{
+    std::stringstream ret;
+    if(hex_data.empty())
+    {
+        return ret.str();
+    }
+    std::vector<hex_block> &text_block = hex_data;
+
+    //////////////////////////////////////////////////////////////////////////
+    /// skip
+    for (int i1=0;i1<text_block.size();++i1)
+    {
+        if (text_block[i1].m_hex.empty())
+        {
+            // no code. skip it
+            text_block.erase(text_block.begin()+i1);
+            --i1;
+        }
+    }
+    //////////////////////////////////////////////////////////////////////////
+    /// continuous address code, merge to one block
+    for (int i2=1;i2<text_block.size();++i2)
+    {
+        if (text_block[i2-1].m_address+text_block[i2-1].m_hex.size()== text_block[i2].m_address)
+        {
+            //merge
+            text_block[i2-1].m_hex = text_block[i2-1].m_hex + text_block[i2].m_hex;
+            text_block.erase(text_block.begin()+i2);
+            --i2;
+        }
+    }
+
+
+    //////////////////////////////////////////////////////////////////////////
+    for (int i3=0;i3<text_block.size();++i3)
+    {
+        hex_data_to_hex_file_format(text_block[i3].m_address,text_block[i3].m_hex, ret);
+    }
+
+    //file endï¼šEnd of File Record
+    ret<<":00000001FF"<<"\n";
+
+    return ret.str();
+}
+
+
+std::string hex_generator_str(T_ASM_CONTEXT *mCtx)
+{
+
+    std::stringstream ret;
+
+
+    if (mCtx->m_text_block.empty())
+    {
+        return ret.str();
+    }
+
+
+    std::vector<T_HEX_TEXT_BLOCK> text_block;
+
+    //////////////////////////////////////////////////////////////////////////
+    text_block = mCtx->m_text_block;//copy
+    //////////////////////////////////////////////////////////////////////////
+
+    //////////////////////////////////////////////////////////////////////////
+    /// skip
+    for (int i1=0;i1<text_block.size();++i1)
+    {
+        if (text_block[i1].m_hex_text.empty())
+        {
+            // no code. skip it
+            text_block.erase(text_block.begin()+i1);
+            --i1;
+        }
+    }
+    //////////////////////////////////////////////////////////////////////////
+    /// continuous address code, merge to one block
+    for (int i2=1;i2<text_block.size();++i2)
+    {
+        if (text_block[i2-1].m_address+text_block[i2-1].m_hex_text.size()== text_block[i2].m_address)
+        {
+            //merge
+            text_block[i2-1].m_hex_text = text_block[i2-1].m_hex_text + text_block[i2].m_hex_text;
+            text_block.erase(text_block.begin()+i2);
+            --i2;
+        }
+    }
+
+
+    //////////////////////////////////////////////////////////////////////////
+    for (int i3=0;i3<text_block.size();++i3)
+    {
+        hex_data_to_hex_file_format(text_block[i3].m_address,text_block[i3].m_hex_text, ret);
+    }
+
+    //file endï¼šEnd of File Record
+    ret<<":00000001FF"<<"\n";
+
+    return ret.str();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

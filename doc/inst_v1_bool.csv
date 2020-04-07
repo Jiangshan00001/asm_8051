@@ -1,0 +1,19 @@
+BOOLEAN VARIABLE MANIPULATION,,,,
+Mnemonic,,Description,Byte,Oscillator Period
+CLR,C,Clear Carry,1,12
+CLR,bit,Clear direct bit,2,12
+SETB,C,Set Carry,1,12
+SETB,bit,Set direct bit,2,12
+CPL,C,Complement Carry,1,12
+CPL,bit,Complement direct bit,2,12
+ANL,"C,bit",AND direct bit to CARRY,2,24
+ANL,"C,/bit",AND complement of direct bit to Carry,2,24
+ORL,"C,bit",OR direct bit to Carry,2,24
+ORL,"C,/bit",OR complement of direct bit to Carry,2,24
+MOV,"C,bit",Move direct bit to Carry,2,12
+MOV,"bit,C",Move Carry to direct bit,2,24
+JC,rel,Jump if Carry is set,2,24
+JNC,rel,Jump if Carry not set,2,24
+JB,"bit,rel",Jump if direct Bit is set,3,24
+JNB,"bit,rel",Jump if direct Bit is Not set,3,24
+JBC,"bit,rel",Jump if direct Bit is set & clear bit,3,24
