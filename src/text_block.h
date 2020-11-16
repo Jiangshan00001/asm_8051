@@ -1,8 +1,7 @@
 #ifndef TEXT_BLOCK_H
 #define TEXT_BLOCK_H
 #include <string>
-#include "asm8051_lex.h"
-
+#include "asm_token.h"
 
 class T_HEX_TEXT_BLOCK
 {
@@ -14,11 +13,21 @@ public:
     std::string get_hex();
 
 
-    static std::vector<T_HEX_TEXT_BLOCK> src_to_blocks(std::string src);
+    //static std::vector<T_HEX_TEXT_BLOCK> src_to_blocks(std::string src);
 
 public:
-    std::string m_source;//当前行的源代码
-    int m_line_no;///当前行号
+    ///directive source and line no
+    /// 源文件中标注的行号和文件。
+    /// 因为是asm文件，里面标注c文件行号和位置，用于调试信息读出
+    ///
+    std::string m_dir_source;
+    int m_dir_line_no;
+
+    std::string m_source;//当前行的源代码，是asm文件
+    int m_line_no;///当前行号，asm文件
+
+
+
 
     unsigned long m_address;
     std::string m_hex_text;

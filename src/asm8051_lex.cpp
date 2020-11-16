@@ -7,504 +7,514 @@
 #include "asm_context.h"
 #include "trim.h"
 #include "split.h"
+#include "replace.h"
+#include "asm_token.h"
 
 using namespace std;
 // simple way in STL
 
-unsigned long StrToHex(std::string mHexStr)
+
+#if 0
+unsigned long StrToNumber(string  mHexStr)
 {
-    unsigned long x;
-    signed long val;
+    mHexStr = trim(mHexStr);
+    if(mHexStr.size()==0)
+    {
+        return 0;
+    }
 
     std::stringstream ss;
-    ss << std::hex << mHexStr;
-    ss >> x;
+    unsigned long x=0;
 
+
+    if(mHexStr.size()>3)
+    {
+        ///字符串是： NOT 20H
+        if(mHexStr.find("NOT ")==0)
+        {
+            std::string tmp11= mHexStr.substr(4);
+            tmp11=trim(tmp11);
+            unsigned long a = StrToNumber(tmp11);
+            return ~a;
+        }
+    }
+    if(mHexStr.size()>3)
+    {
+        if(mHexStr.find("LOW")==0)
+        {
+            std::string tmp11= mHexStr.substr(3);
+            tmp11=trim(tmp11);
+            unsigned long a = StrToNumber(tmp11);
+            return (0xff&a);
+        }
+    }
+    if(mHexStr.size()>4)
+    {
+        if(mHexStr.find("HIGH")==0)
+        {
+            std::string tmp11= mHexStr.substr(4);
+            tmp11=trim(tmp11);
+            unsigned long a = StrToNumber(tmp11);
+            return ((a>>8)&0xff);
+        }
+    }
+
+
+    if(mHexStr[0]=='(')
+    {
+        //右括号，需要去除括号
+        size_t lindex = mHexStr.find(')');
+        std::string sub_str = mHexStr.substr(1, lindex-1);
+        unsigned long a = StrToNumber(sub_str);
+        ///FIXME 此处没有考虑运算符
+        return a;
+    }
+
+    size_t lindex2 = mHexStr.find('/');
+    if(lindex2 != std::string::npos)
+    {
+        std::vector<std::string> wds = split(mHexStr, "/");
+        unsigned long a = StrToNumber( wds[0]);
+        unsigned long b = StrToNumber( wds[1]);
+        return a/b;
+    }
+
+
+
+
+
+
+
+
+    if((mHexStr[mHexStr.size()-1]=='H')||(mHexStr[mHexStr.size()-1]=='h'))
+    {
+        ss << std::hex << mHexStr;
+        ss >> x;
+        return x;
+    }
+
+    if(mHexStr.size()>2)
+    {
+        if((mHexStr[0]=='0')&&((mHexStr[1]=='X')||(mHexStr[1]=='x')))
+        {
+            ss << std::hex << mHexStr.substr(2);
+            ss >> x;
+            return x;
+        }
+    }
+
+    if((mHexStr[mHexStr.size()-1]=='B')||(mHexStr[mHexStr.size()-1]=='b'))
+    {
+        x=0;
+        for(unsigned i=0;i<mHexStr.size();++i)
+        {
+            if((mHexStr[i]!='1')&&(mHexStr[i]!='0'))
+            {
+                break;
+            }
+
+            x<<=1;
+            if(mHexStr[i]=='1')
+            {
+                x+=1;
+            }
+
+        }
+        return x;
+    }
+
+
+    ss << mHexStr;
+    ss >> x;
     return x;
 }
 
-typedef int (*op_tmp) (int i);
-
-/// [a-zA-Z0-9]
-/// :
-/// ,
-/// 其他符号
-int split_words(std::string mOneLine, std::vector<std::string> &mWords)
+std::string NumberToStr(long num)
 {
-    //去除空格
-    // trim
-    trim1(mOneLine);
-    // lower--->upper
-    transform<std::basic_string<char>::iterator, std::basic_string<char>::iterator, op_tmp>(mOneLine.begin(), mOneLine.end(), mOneLine.begin(), toupper);
-
-    mWords.clear();
-    if(mOneLine.empty())return 0;
-
-    //;区分，去掉注释
-    std::vector<std::string> comment1 = split(mOneLine, ";");
-
-    if(comment1.size()==0){return 0;}
-    mOneLine = comment1[0];
-
-
-    //查找是否有: 如果有，则前面是标签
-    mWords = split(mOneLine, ":");
-    if (mWords.size()>1)
-    {
-        //此行为标签
-        mWords[0] = mWords[0]+":";
-        mWords.resize(1);
-        return mWords.size();
-    }
-
-    //通过第一个空格，找到指令
-    mWords = split(mOneLine, " ");
-    std::string cmd = mWords[0];
-
-    ///去除指令后，都为参数，通过逗号区分
-    mOneLine = mOneLine.substr(cmd.size());
-    trim1(mOneLine);
-
-    mWords = split(mOneLine, ",");
-    mWords.insert(mWords.begin(), cmd);
-
-    for(int i=0;i<mWords.size();++i)
-    {
-        mWords[i] = trim(mWords[i]);
-    }
-
-    return mWords.size();
+    std::stringstream s;
+    std::string ss;
+    s<<std::hex<<num<<"H";
+    return s.str();
 }
 
+#endif
 
-#if 0
+
 typedef int (*op_tmp) (int i);
 
-/// [a-zA-Z0-9]
-/// :
-/// ,
-/// 其他符号
-int split_words(std::string mOneLine, std::vector<std::string> &mWords)
+
+string &T_ASM_CONTEXT::asm_line_preprocess(string &mOneLine)
 {
-    //去除空格
-    // trim
-    trim1(mOneLine);
-    // lower--->upper
-    transform<std::basic_string<char>::iterator, std::basic_string<char>::iterator, op_tmp>(mOneLine.begin(), mOneLine.end(), mOneLine.begin(), toupper);
-
-    mWords.clear();
-    if(mOneLine.empty())return 0;
-
-    const char *mTmpStrPtrStart = mOneLine.c_str();
-    const char *mTmpStrPtr1 = mOneLine.c_str();
-    const char *mTmpStrPtr2 = mOneLine.c_str();
-
-    while((mTmpStrPtr2-mTmpStrPtrStart)!=mOneLine.size())
-    {
-        ///字母和数字连在一起作为一个单词，其他符号单独作为一个单词
-        unsigned char mC = (*mTmpStrPtr2);
-        if ( (( mC>='0')&&( mC<='9'))||
-            (( mC>='a')&&( mC<='z'))||
-            (( mC>='A')&&( mC<='Z'))
-            )
-        {
-            mTmpStrPtr2++;
-            continue;
-        }
-        else
-        {
-            if (mTmpStrPtr1!=mTmpStrPtr2)
-            {
-                std::string mCS;
-                mCS.assign(mTmpStrPtr1, mTmpStrPtr2);
-                mWords.push_back(mCS);
-                mTmpStrPtr1 = mTmpStrPtr2;
-            }
-
-            if (mC!=' ')
-            {
-                unsigned char mCT[4]={0,0,0,0};
-                mCT[0]=mC;
-                mCT[1] = 0;
-                mWords.push_back((char*)mCT);
-            }
-
-            mTmpStrPtr1 = ++mTmpStrPtr2;
-            continue;
-        }
-    }
-
-    if (mTmpStrPtr1!=mTmpStrPtr2)
-    {
-        std::string mCS;
-        mCS.assign(mTmpStrPtr1, mTmpStrPtr2);
-        mWords.push_back(mCS);
-        mTmpStrPtr1 = mTmpStrPtr2;
-    }
 
 #if 1
-    for(int i=0;i<mWords.size();i++)
+    //去除注释. 汇编中，一行的;之后为注释
+    if(mOneLine.find(";")!=mOneLine.npos)
     {
-        cout<<"iWorld="<<i<<"."<<mWords[i].size()<<  " ["<<mWords[i]<<"]"<<endl;
+        //std::cout<<one_line_text<<"\n";
+        mOneLine = mOneLine.substr(0, mOneLine.find(";"));
+        //std::cout<<one_line_text<<"\n";
+    }
+
+    trim1(mOneLine);
+
+    //去除开头是 双斜杠的c语言语法注释
+    if(mOneLine.size()>2)
+    {
+        if((mOneLine[0]=='/')&&(mOneLine[1]=='/'))
+        {
+            mOneLine="";
+            return mOneLine;
+        }
     }
 
 #endif
 
-    return mWords.size();
+    /// 将\t改为空格，方便统一处理
+    mOneLine = replace(mOneLine, "\t", " ");
+    mOneLine = replace(mOneLine, "\r", " ");
+
+    //去除空格
+    // trim
+    trim1(mOneLine);
+
+
+    ///添加#line 的处理
+    if(mOneLine.size()>5)
+    {
+        if(mOneLine[0]=='#')
+        {
+            ///此处为预处理命令，命令完成后，需要清空mOneLine
+
+            if(mOneLine.substr(0, 5)=="#line")
+            {
+                std::vector<std::string> dir_str = split(mOneLine," ");
+                this->m_dir_source = replace(dir_str[2], "\n", "");
+                this->m_dir_line_no = StrToNumber(dir_str[1]);
+            }
+
+            mOneLine.clear();
+        }
+    }
+
+    // lower--->upper
+    transform<std::basic_string<char>::iterator, std::basic_string<char>::iterator, op_tmp>(mOneLine.begin(), mOneLine.end(), mOneLine.begin(), toupper);
+
+    return mOneLine;
 }
 
-#endif
-
-
-
-asm_token param_parse(std::string str1)
+int T_ASM_CONTEXT::eval_token(asm_token &tk, unsigned long curr_addr, unsigned curr_cmd_byte_size, int not_eval_label)
 {
-    asm_token token1;
-    token1.val_str = str1;
 
-    std::map<std::string, int> m_keys;
-
-    m_keys["A"] = TOKEN_ACC;
-    m_keys["C"] = TOKEN_C;
-    m_keys["AB"] = TOKEN_AB;
-    m_keys["@DPTR"] = TOKEN_AT_DPTR;
-    m_keys["DPTR"] = TOKEN_DPTR;
-    m_keys["@A+PC"] = TOKEN_AT_A_PLUS_PC;
-    m_keys["@A+DPTR"] = TOKEN_AT_A_PLUS_DPTR;
-    m_keys["@R0"] = TOKEN_AT_RI;
-    m_keys["@R1"] = TOKEN_AT_RI;
-    m_keys["R0"] = TOKEN_RN;
-    m_keys["R1"] = TOKEN_RN;
-    m_keys["R2"] = TOKEN_RN;
-    m_keys["R3"] = TOKEN_RN;
-    m_keys["R4"] = TOKEN_RN;
-    m_keys["R5"] = TOKEN_RN;
-    m_keys["R6"] = TOKEN_RN;
-    m_keys["R7"] = TOKEN_RN;
-
-
-
-
-    if (m_keys.find(str1)!=m_keys.end())
+    if(tk.m_resolved==1)
     {
-        token1.type = m_keys[str1];
-        token1.num = 0;
-        if(str1=="@R1")token1.num = 1;
-        if(str1=="R1")token1.num = 1;
-        if(str1=="R2")token1.num = 2;
-        if(str1=="R3")token1.num = 3;
-        if(str1=="R4")token1.num = 4;
-        if(str1=="R5")token1.num = 5;
-        if(str1=="R6")token1.num = 6;
-        if(str1=="R7")token1.num = 7;
-        return token1;
+        //已经是确定的数值 了
+        return 0;
     }
 
-
-    if(str1[0]=='#')
+    if(tk.type==TOKEN_KEYWORD)
     {
-        //立即数？
-        token1.type = TOKEN_J_DATA;
-        token1.num = StrToHex(str1.c_str()+1);//
-        return token1;
-    }
-
-    if(str1[0]=='/')
-    {
-        //立即数？
-        token1.type = TOKEN_DIV_NUM;
-        token1.num = StrToHex(str1.c_str()+1);//
-        return token1;
-    }
-
-    if( (str1[0]>='0' )&&(str1[0]<='9'))
-    {
-        token1.type = TOKEN_NUM;
-        token1.num = StrToHex(str1);//
-        return token1;
-    }
-
-
-    if(( (str1[0]>='a' )&&(str1[0]<='z'))||
-            ( (str1[0]>='A' )&&(str1[0]<='Z'))
-            )
-    {
-        if (str1[str1.size()-1]==':' )
+        auto it=m_preprocess_var.find(tk.val_str);
+        if(it!=m_preprocess_var.end())
         {
-            token1.type = TOKEN_LABEL;
-            token1.num = 0;//
-            token1.val_str = token1.val_str.substr(0, token1.val_str.size()-1);
-            return token1;
+            //token替换
+            tk = it->second;
+            return 0;
+        }
 
+
+        if(tk.val_str=="$")
+        {
+            if(!not_eval_label)
+            {
+                tk.num = curr_addr;
+                tk.rel = tk.num - curr_addr - curr_cmd_byte_size;
+                tk.m_resolved = 2;
+                return 0;
+            }
+        }
+
+        /// 检查是否是标签，如果是标签，则替换为标签对应的值
+        /// 如果标签地址未确定，则延后确定
+        if(this->m_label_address.find(tk.val_str)!=this->m_label_address.end())
+        {
+            if(!not_eval_label)
+            {
+                tk.num = this->m_label_address[tk.val_str];
+                tk.rel = tk.num- curr_addr - curr_cmd_byte_size;
+                tk.m_resolved = 2;
+                return 0;
+            }
+        }
+
+
+        //此处是未知的变量？？？
+        //可能是后面的label，暂未查到，可以下一遍确定
+        tk.m_resolved = 0;
+        return 0;
+    }
+
+    if(tk.type==TOKEN_DIV_NUM)
+    {
+        eval_token(tk.m_childs[0], curr_addr,  curr_cmd_byte_size);
+        if(tk.m_childs[0].m_resolved)
+        {
+            tk.m_resolved = 2;
+            tk.num = tk.m_childs[0].num;
+            //tk.m_childs.clear();
+        }
+
+        return 0;
+    }
+
+    if (tk.type==TOKEN_J_DATA)
+    {
+        eval_token(tk.m_childs[0], curr_addr,  curr_cmd_byte_size);
+        if(tk.m_childs[0].m_resolved)
+        {
+            tk.m_resolved = 2;
+            tk.num = tk.m_childs[0].num;
+            //tk.m_childs.clear();
+        }
+
+        return 0;
+    }
+
+
+    if((tk.child_type==TOKEN_OPR)&&(tk.m_childs.size()>0))
+    {
+        if(tk.m_childs[0].val_str=="&")
+        {
+          eval_token(tk.m_childs[1], curr_addr,  curr_cmd_byte_size);
+          eval_token(tk.m_childs[2], curr_addr,  curr_cmd_byte_size);
+
+          if((!tk.m_childs[1].m_resolved)||
+                  (!tk.m_childs[2].m_resolved)
+                  )
+          {
+              return 0;
+          }
+
+          unsigned a = tk.m_childs[1].num;
+          unsigned b = tk.m_childs[2].num;
+
+          tk.num = a&b;
+          tk.m_resolved = 2;
+          tk.type = TOKEN_NUM;
+        }
+        else if(tk.m_childs[0].val_str=="<<")
+        {
+          eval_token(tk.m_childs[1], curr_addr,  curr_cmd_byte_size);
+          eval_token(tk.m_childs[2], curr_addr,  curr_cmd_byte_size);
+
+          if((!tk.m_childs[1].m_resolved)||
+                  (!tk.m_childs[2].m_resolved)
+                  )
+          {
+              return 0;
+          }
+
+          unsigned a = tk.m_childs[1].num;
+          unsigned b = tk.m_childs[2].num;
+
+          tk.num = a<<b;
+          tk.m_resolved = 2;
+          tk.type = TOKEN_NUM;
+        }
+        else if(tk.m_childs[0].val_str==">>")
+        {
+          eval_token(tk.m_childs[1], curr_addr,  curr_cmd_byte_size);
+          eval_token(tk.m_childs[2], curr_addr,  curr_cmd_byte_size);
+
+          if((!tk.m_childs[1].m_resolved)||
+                  (!tk.m_childs[2].m_resolved)
+                  )
+          {
+              return 0;
+          }
+
+          unsigned a = tk.m_childs[1].num;
+          unsigned b = tk.m_childs[2].num;
+
+          tk.num = a>>b;
+          tk.m_resolved = 2;
+          tk.type = TOKEN_NUM;
+        }
+        else if(tk.m_childs[0].val_str=="(")
+        {
+            eval_token(tk.m_childs[1], curr_addr,  curr_cmd_byte_size);
+            if(tk.m_childs[1].m_resolved)
+            {
+                tk.num = tk.m_childs[1].num;
+                tk.rel =  tk.m_childs[1].num;
+                //tk.m_childs.clear();
+                tk.m_resolved = 2;
+            }
+        }
+        else if(tk.m_childs[0].val_str=="NOT")
+        {
+            eval_token(tk.m_childs[1], curr_addr,  curr_cmd_byte_size);
+            if(tk.m_childs[1].m_resolved)
+            {
+                tk.num = ~tk.m_childs[1].num;
+                //tk.m_childs.clear();
+                tk.m_resolved = 2;
+            }
+        }
+        else if(tk.m_childs[0].val_str=="HIGH")
+        {
+            eval_token(tk.m_childs[1], curr_addr,  curr_cmd_byte_size);
+            if(tk.m_childs[1].m_resolved)
+            {
+                tk.num = ((tk.m_childs[1].num)>>8)&0xff;
+                //tk.m_childs.clear();
+                tk.m_resolved = 2;
+            }
+        }
+        else if(tk.m_childs[0].val_str=="LOW")
+        {
+            eval_token(tk.m_childs[1], curr_addr,  curr_cmd_byte_size);
+            if(tk.m_childs[1].m_resolved)
+            {
+                tk.num = 0xff&(tk.m_childs[1].num);
+                tk.m_resolved = 2;
+            }
+        }
+        else if(tk.m_childs[0].val_str==".")
+        {
+
+            eval_token(tk.m_childs[1], curr_addr,  curr_cmd_byte_size);
+            eval_token(tk.m_childs[2], curr_addr,  curr_cmd_byte_size);
+
+            if((!tk.m_childs[1].m_resolved)||
+                    (!tk.m_childs[2].m_resolved)
+                    )
+            {
+                return 0;
+            }
+
+            unsigned a = tk.m_childs[1].num;
+            unsigned b = tk.m_childs[2].num;
+            unsigned c = 0;
+            //std::cout<<"eval ."<<a<<". "<<b<<". "<<c<<std::endl;
+            if(bit_addr_parse(a,b,c))
+            {
+                tk.num = c;
+                tk.m_resolved = 2;
+                tk.type = TOKEN_NUM;
+                //tk.m_childs.clear();
+            }
+            else
+            {
+                cerr<<"ERROR: BIT PARSE " <<tk.val_str<<". a="<<a<<". b="<<b<<". c="<<c<<"\n";
+            }
+        }
+        else  if(tk.m_childs[0].val_str=="/")
+        {
+            eval_token(tk.m_childs[1], curr_addr,  curr_cmd_byte_size);
+            eval_token(tk.m_childs[2], curr_addr,  curr_cmd_byte_size);
+
+            if((!tk.m_childs[1].m_resolved)||
+                    (!tk.m_childs[2].m_resolved)
+                    )
+            {
+                return 0;
+            }
+
+            unsigned a = tk.m_childs[1].num;
+            unsigned b = tk.m_childs[2].num;
+            //unsigned c = 0;
+            if(b==0){a=0;b=1;std::cout<<"ERROR:line:"<<tk.line_no <<". div by zero error\n";}
+            tk.num = a/b;
+            tk.m_resolved = 2;
+            tk.type = TOKEN_NUM;
+            //tk.m_childs.clear();
+        }
+        else  if(tk.m_childs[0].val_str=="+")
+        {
+            eval_token(tk.m_childs[1], curr_addr,  curr_cmd_byte_size);
+            eval_token(tk.m_childs[2], curr_addr,  curr_cmd_byte_size);
+
+            if((!tk.m_childs[1].m_resolved)||
+                    (!tk.m_childs[2].m_resolved)
+                    )
+            {
+                return 0;
+            }
+
+            unsigned a = tk.m_childs[1].num;
+            unsigned b = tk.m_childs[2].num;
+            //unsigned c = 0;
+            tk.num = a+b;
+            tk.m_resolved = 2;
+            tk.type = TOKEN_NUM;
+            //tk.m_childs.clear();
+        }
+        else  if(tk.m_childs[0].val_str=="-")
+        {
+            eval_token(tk.m_childs[1], curr_addr,  curr_cmd_byte_size);
+            eval_token(tk.m_childs[2], curr_addr,  curr_cmd_byte_size);
+
+            if((!tk.m_childs[1].m_resolved)||
+                    (!tk.m_childs[2].m_resolved)
+                    )
+            {
+                return 0;
+            }
+
+
+            unsigned a = tk.m_childs[1].num;
+            unsigned b = tk.m_childs[2].num;
+            //unsigned c = 0;
+            tk.num = a-b;
+            tk.m_resolved = 2;
+            tk.type = TOKEN_NUM;
+            //tk.m_childs.clear();
+        }
+        else if(tk.m_childs[0].val_str=="SHL")
+        {
+            eval_token(tk.m_childs[1], curr_addr,  curr_cmd_byte_size);
+            eval_token(tk.m_childs[2], curr_addr,  curr_cmd_byte_size);
+
+            if((!tk.m_childs[1].m_resolved)||
+                    (!tk.m_childs[2].m_resolved)
+                    )
+            {
+                return 0;
+            }
+
+
+            tk.num = tk.m_childs[1].num<<tk.m_childs[2].num;
+            //tk.m_childs.clear();
+            tk.m_resolved = 2;
+        }
+        else if(tk.m_childs[0].val_str=="MOD")
+        {
+            eval_token(tk.m_childs[1], curr_addr,  curr_cmd_byte_size);
+            eval_token(tk.m_childs[2], curr_addr,  curr_cmd_byte_size);
+
+            if((!tk.m_childs[1].m_resolved)||
+                    (!tk.m_childs[2].m_resolved)
+                    )
+            {
+                return 0;
+            }
+
+
+            tk.num = tk.m_childs[1].num % tk.m_childs[2].num;
+            //tk.m_childs.clear();
+            tk.m_resolved = 2;
         }
         else
         {
-            token1.type = TOKEN_KEYWORD;
-            token1.num = 0;//
-            return token1;
+            std::cout<<"ERROR: token type not processed:"<<tk.m_childs[0].val_str<<"\n";
         }
     }
 
-    std::cout<<"error: unkown key:"<<str1<<std::endl;
-    token1.type = TOKEN_UNKNOWN;
-    token1.num = 0;
-    return token1;
+
+    ///检查tk里，是否有label var
+    ///
+    return 0;
 }
 
 
 
-std::vector<asm_token> asm_line_parse(void *ctx, std::string str1)
-{
-    std::vector<asm_token> tokens;
-    std::vector<std::string> words;
-    T_ASM_CONTEXT *mCtx = (T_ASM_CONTEXT*)ctx;
-
-    int siz = split_words(str1, words);
-
-    for(int i=0;i<words.size();++i)
-    {
-        asm_token token1;
-
-        if(words[i].size()==0)continue;//0size. just skip
-
-        token1.val_str = words[i];
-
-        if(mCtx->m_line_key_word_ptr.find(words[i])!=mCtx->m_line_key_word_ptr.end())
-        {
-            //keyword
-            token1.type=TOKEN_CMD;
-            tokens.push_back(token1);
-            continue;
-        }
-        token1= param_parse(words[i]);
-        tokens.push_back(token1);
-    }
-
-    return tokens;
-}
-
-
-
-std::vector<std::string> template_param_parse_str(std::string str1)
-{
-    //"A,direct"
-    //"A,Rn"
-    std::vector<string> ret;
-
-    str1 = trim1(str1,'\"');
-    std::vector<std::string> params = split(str1, ",");
-
-
-    for(int i=0;i<params.size();++i)
-    {
-        string token1;
-        std::string param1=params[i];
-
-        token1 = "";
-
-        if(param1=="A")
-        {
-            token1 = "TOKEN_ACC";
-        }
-        else if(param1=="Rn")
-        {
-            token1="TOKEN_RN";
-        }
-        else if(param1=="direct")
-        {
-            token1 = "TOKEN_NUM";
-        }
-        else if(param1=="#data")
-        {
-            token1="TOKEN_J_DATA";
-        }
-        else if(param1=="#data16")
-        {
-            token1="TOKEN_J_DATA";
-        }
-        else if(param1=="@Ri")
-        {
-            token1 = "TOKEN_AT_RI";
-        }
-        else if(param1=="rel")
-        {
-            token1="TOKEN_KEYWORD";
-        }
-        else if(param1=="addr11")
-        {
-            token1 = "TOKEN_KEYWORD";
-        }
-        else if(param1=="addr16")
-        {
-            token1 = "TOKEN_KEYWORD";
-        }
-        else if(param1=="data16")
-        {
-            token1 = "TOKEN_KEYWORD";
-        }
-        else if(param1=="bit")
-        {
-            token1 = "TOKEN_NUM";
-        }
-        else if(param1=="/bit")
-        {
-            token1 = "TOKEN_DIV_NUM";
-        }
-        else if(param1=="@A+DPTR")
-        {
-            token1 = "TOKEN_AT_A_PLUS_DPTR";
-        }
-        else if(param1=="@A+PC")
-        {
-            token1 = "TOKEN_AT_A_PLUS_PC";
-        }
-        else if(param1=="DPTR")
-        {
-            token1 = "TOKEN_DPTR";
-        }
-        else if(param1=="@DPTR")
-        {
-            token1 = "TOKEN_AT_DPTR";
-        }
-        else if(param1=="AB")
-        {
-            token1 = "TOKEN_AB";
-        }
-        else if(param1=="C")
-        {
-            token1 = "TOKEN_C";
-        }
-        else if(param1=="code addr")
-        {
-            token1 = "TOKEN_KEYWORD";
-        }
-        else if(param1=="data addr")
-        {
-            token1 = "TOKEN_KEYWORD";
-
-        }
-        else if(param1=="bit addr")
-        {
-            token1 = "TOKEN_KEYWORD";
-        }
-        else
-        {
-            token1="TOKEN_UNKNOWN";
-            std::cout<<"template_param_parse---unkown type:"<<param1<<std::endl;
-        }
-        ret.push_back(token1);
-    }
-    return ret;
-}
-
-std::vector<std::string> template_param_parse_str_var(std::string str1)
-{
-    //"A,direct"
-    //"A,Rn"
-    std::vector<string> ret;
-
-    str1 = trim1(str1,'\"');
-    std::vector<std::string> params = split(str1, ",");
-
-
-    for(int i=0;i<params.size();++i)
-    {
-        string token1;
-        std::string param1=params[i];
-
-        token1 = "";
-
-        if(param1=="A")
-        {
-            token1 = "num";
-        }
-        else if(param1=="Rn")
-        {
-            token1="num";
-        }
-        else if(param1=="direct")
-        {
-            token1 = "num";
-        }
-        else if(param1=="#data")
-        {
-            token1="num";
-        }
-        else if(param1=="#data16")
-        {
-            token1="num";
-        }
-        else if(param1=="@Ri")
-        {
-            token1 = "num";
-        }
-        else if(param1=="rel")
-        {
-            token1="rel";
-        }
-        else if(param1=="addr11")
-        {
-            token1 = "num";
-        }
-        else if(param1=="addr16")
-        {
-            token1 = "num";
-        }
-        else if(param1=="data16")
-        {
-            token1 = "num";
-        }
-        else if(param1=="bit")
-        {
-            token1 = "num";
-        }
-        else if(param1=="/bit")
-        {
-            token1 = "num";
-        }
-        else if(param1=="@A+DPTR")
-        {
-            token1 = "num";
-        }
-        else if(param1=="@A+PC")
-        {
-            token1 = "num";
-        }
-        else if(param1=="DPTR")
-        {
-            token1 = "num";
-        }
-        else if(param1=="@DPTR")
-        {
-            token1 = "num";
-        }
-        else if(param1=="AB")
-        {
-            token1 = "num";
-        }
-        else if(param1=="C")
-        {
-            token1 = "num";
-        }
-        else if(param1=="code addr")
-        {
-            token1 = "num";
-        }
-        else if(param1=="data addr")
-        {
-            token1 = "num";
-        }
-        else if(param1=="bit addr")
-        {
-            token1 = "num";
-        }
-        else
-        {
-            token1="TOKEN_UNKNOWN";
-            std::cout<<"template_param_parse---unkown type:"<<param1<<std::endl;
-        }
-        ret.push_back(token1);
-    }
-    return ret;
-
-}

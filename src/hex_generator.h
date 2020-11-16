@@ -7,12 +7,21 @@
 
 
 
-typedef struct hex_block
+class hex_block
 {
-    std::string m_hex;
+public:
+    std::string m_bin;
     unsigned long m_address;
     unsigned char m_crc;
-}hex_block;
+
+    // 重载 + 运算符，用于把两个 Box 对象相加
+    bool operator <(hex_block &b);
+};
+
+//bool operator < (hex_block &a, hex_block &b);
+bool hex_block_cmp(hex_block a, hex_block b);
+
+
 
 /// 将字符串格式转为hex 文件格式的字符串
 int hex_data_to_hex_file_format(unsigned long address, std::string hex_data, std::stringstream &file_out);

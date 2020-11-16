@@ -9,6 +9,10 @@ typedef struct hex_code_asm_table
     unsigned m_byte_num;
     std::string cmd;
     std::string params;
+    int param_cnt;
+    std::string m_param0;// #$0
+    std::string m_param1; // R$1
+    std::string m_param2;
 }hex_code_asm_table;
 
 
@@ -24,6 +28,7 @@ typedef struct asm_to_hex_table
     std::string m_byte0;
     std::string m_byte1;
     std::string m_byte2;
+
     std::string m_token0;
     std::string m_token1;
     std::string m_token2;

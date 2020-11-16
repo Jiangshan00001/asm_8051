@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <algorithm>
 #include <split.h>
 #include <trim.h>
 #include <assert.h>
@@ -26,7 +27,7 @@ std::string HByteToStr(const unsigned char mC)
 
 unsigned char HStrToByte(const unsigned char mC)
 {
-    unsigned char mTmpStr[4]={0,0,0,0};
+    //unsigned char mTmpStr[4]={0,0,0,0};
     ///0--F
     if (mC<'A')
     {
@@ -73,7 +74,7 @@ std::vector< unsigned int> hex_str_to_ints(std::string mstr1)
 {
     std::vector< unsigned int> ret ;
 
-    for(int i=0;i<mstr1.size();)
+    for(unsigned i=0;i<mstr1.size();)
     {
         unsigned int a = StrToByte(mstr1.substr(i,2));
         i+=2;
@@ -89,7 +90,7 @@ std::vector<hex_block> hex_file_to_hex_data(std::string hex_file_data)
     unsigned long line_addr = 0;
     std::vector<hex_block> ret;
 
-    for(int i=0;i<lines.size();++i)
+    for(unsigned i=0;i<lines.size();++i)
     {
         hex_block m_block;
         std::string one_line = trim(lines[i]);
@@ -113,10 +114,10 @@ std::vector<hex_block> hex_file_to_hex_data(std::string hex_file_data)
             break;
         }
         m_block.m_address = data_addr + line_addr;
-        m_block.m_hex.resize(data_num);
-        for(int j=0;j<data_num;j++)
+        m_block.m_bin.resize(data_num);
+        for(unsigned j=0;j<data_num;j++)
         {
-            m_block.m_hex[j] = ints[j+4];
+            m_block.m_bin[j] = ints[j+4];
         }
         m_block.m_crc = ints[data_num+4];
         ret.push_back(m_block);
@@ -125,11 +126,16 @@ std::vector<hex_block> hex_file_to_hex_data(std::string hex_file_data)
 
 
     ///对于多个block，查看是否有可以合并的，如果有，则合并
-    for(int i=0;i<ret.size()-1;)
+    /// 合并之前，先按照地址大小进行排序，小地址放前面
+
+    std::sort(ret.begin(), ret.end(), hex_block_cmp);
+
+
+    for(int i=0;i<((int)ret.size())-1;)
     {
-        if(ret[i].m_address+ret[i].m_hex.size()==ret[i+1].m_address)
+        if(ret[i].m_address+ret[i].m_bin.size()==ret[i+1].m_address)
         {
-            ret[i].m_hex = ret[i].m_hex + ret[i+1].m_hex;
+            ret[i].m_bin = ret[i].m_bin + ret[i+1].m_bin;
             ret.erase(ret.begin()+i+1);
         }
         else
@@ -139,7 +145,6 @@ std::vector<hex_block> hex_file_to_hex_data(std::string hex_file_data)
     }
 
     return ret;
-
 }
 
 
@@ -200,7 +205,6 @@ int hex_data_to_hex_file_format(unsigned long address, std::string hex_data, std
     return 0;
 }
 
-
 std::string hex_data_to_hex_file(std::vector<hex_block> hex_data)
 {
     std::stringstream ret;
@@ -212,9 +216,13 @@ std::string hex_data_to_hex_file(std::vector<hex_block> hex_data)
 
     //////////////////////////////////////////////////////////////////////////
     /// skip
-    for (int i1=0;i1<text_block.size();++i1)
+    while(text_block[0].m_bin.empty())
     {
-        if (text_block[i1].m_hex.empty())
+        text_block.erase(text_block.begin());
+    }
+    for (unsigned i1=0;i1<text_block.size();++i1)
+    {
+        if (text_block[i1].m_bin.empty())
         {
             // no code. skip it
             text_block.erase(text_block.begin()+i1);
@@ -223,12 +231,12 @@ std::string hex_data_to_hex_file(std::vector<hex_block> hex_data)
     }
     //////////////////////////////////////////////////////////////////////////
     /// continuous address code, merge to one block
-    for (int i2=1;i2<text_block.size();++i2)
+    for (unsigned i2=1;i2<text_block.size();++i2)
     {
-        if (text_block[i2-1].m_address+text_block[i2-1].m_hex.size()== text_block[i2].m_address)
+        if (text_block[i2-1].m_address+text_block[i2-1].m_bin.size()== text_block[i2].m_address)
         {
             //merge
-            text_block[i2-1].m_hex = text_block[i2-1].m_hex + text_block[i2].m_hex;
+            text_block[i2-1].m_bin = text_block[i2-1].m_bin + text_block[i2].m_bin;
             text_block.erase(text_block.begin()+i2);
             --i2;
         }
@@ -236,9 +244,9 @@ std::string hex_data_to_hex_file(std::vector<hex_block> hex_data)
 
 
     //////////////////////////////////////////////////////////////////////////
-    for (int i3=0;i3<text_block.size();++i3)
+    for (unsigned i3=0;i3<text_block.size();++i3)
     {
-        hex_data_to_hex_file_format(text_block[i3].m_address,text_block[i3].m_hex, ret);
+        hex_data_to_hex_file_format(text_block[i3].m_address,text_block[i3].m_bin, ret);
     }
 
     //file end：End of File Record
@@ -260,6 +268,22 @@ std::string hex_generator_str(T_ASM_CONTEXT *mCtx)
     }
 
 
+    std::vector<hex_block> text_block;
+
+
+    for(unsigned i=0;i<mCtx->m_text_block.size();++i)
+    {
+        hex_block one;
+        one.m_bin = mCtx->m_text_block[i].m_hex_text;
+        one.m_address = mCtx->m_text_block[i].m_address;
+        text_block.push_back(one);
+    }
+
+    return hex_data_to_hex_file(text_block);
+#if 0
+
+
+
     std::vector<T_HEX_TEXT_BLOCK> text_block;
 
     //////////////////////////////////////////////////////////////////////////
@@ -268,7 +292,11 @@ std::string hex_generator_str(T_ASM_CONTEXT *mCtx)
 
     //////////////////////////////////////////////////////////////////////////
     /// skip
-    for (int i1=0;i1<text_block.size();++i1)
+    while(text_block[0].m_hex_text.empty())
+    {
+        text_block.erase(text_block.begin());
+    }
+    for (unsigned i1=0;i1<text_block.size();++i1)
     {
         if (text_block[i1].m_hex_text.empty())
         {
@@ -279,7 +307,7 @@ std::string hex_generator_str(T_ASM_CONTEXT *mCtx)
     }
     //////////////////////////////////////////////////////////////////////////
     /// continuous address code, merge to one block
-    for (int i2=1;i2<text_block.size();++i2)
+    for (unsigned i2=1;i2<text_block.size();++i2)
     {
         if (text_block[i2-1].m_address+text_block[i2-1].m_hex_text.size()== text_block[i2].m_address)
         {
@@ -292,7 +320,7 @@ std::string hex_generator_str(T_ASM_CONTEXT *mCtx)
 
 
     //////////////////////////////////////////////////////////////////////////
-    for (int i3=0;i3<text_block.size();++i3)
+    for (unsigned i3=0;i3<text_block.size();++i3)
     {
         hex_data_to_hex_file_format(text_block[i3].m_address,text_block[i3].m_hex_text, ret);
     }
@@ -301,41 +329,28 @@ std::string hex_generator_str(T_ASM_CONTEXT *mCtx)
     ret<<":00000001FF"<<"\n";
 
     return ret.str();
+    #endif
+}
+
+#if 0
+bool operator <(hex_block &a, hex_block &b)
+{
+    if(a.m_address<b.m_address)return true;
+    return false;
+
+}
+#endif
+
+
+ bool hex_block::operator <( hex_block &b)
+{
+    if(m_address<b.m_address)return true;
+    return false;
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+bool hex_block_cmp(hex_block a, hex_block b)
+{
+    if(a.m_address<b.m_address)return true;
+    return false;
+}
