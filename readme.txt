@@ -1,3 +1,9 @@
+this project is merged to https://github.com/Jiangshan00001/MZC8051.
+and this repo will no longer update any more.
+please goto the new site: https://github.com/Jiangshan00001/MZC8051
+
+======================
+
 A 8051 asm to hex assembly compiler. The purpose of the compiler is to learn how to write a compiler myself.
 
 
