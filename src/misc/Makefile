@@ -58,11 +58,11 @@ $(SRCS_LEXYACC):
 
 $(PROG): $(OBJS)
 	@ echo g++ $<
-	$(CXX) -static -g $^  -o $@
+	@$(CXX) -static -g $^  -o $@
 
 $(PROG_LIB):$(PROG_LIB_OBJS)
 	@ echo ar $<
-	ar -rcs	  $@ $^
+	@ar -rcs	  $@ $^
 
 
 $(BUILD_DIR)%.o:%.c
@@ -75,7 +75,7 @@ $(BUILD_DIR)%.o:%.cc
 
 $(BUILD_DIR)%.o:%.cpp
 	@ echo compiling $<
-	$(CXX)  $(CXX_FLAGS) $(INCS) -c $< -o $@
+	@$(CXX)  $(CXX_FLAGS) $(INCS) -c $< -o $@
 
 
 CXX_FLAGS += -MMD -MP
