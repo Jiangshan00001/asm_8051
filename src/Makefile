@@ -3,9 +3,9 @@ PROG=$(BUILD_DIR)asm8051.exe
 PROG_LIB=$(BUILD_DIR)asm8051.a
 
 SRCS_ASM8051_LIB= asm8051.cpp asm8051_lex.cpp asm_context.cpp \
-            asm_keywords.cpp  asm_table.cpp asm_token.cpp dis8051.cpp \
-            dis_keywords.cpp hex_generator.cpp \
-             text_block.cpp  api/asm8051_api.cpp  asm_extend_keywords.cpp asm_macro_keywords.cpp
+			asm_keywords.cpp  asm_table.cpp asm_token.cpp dis8051.cpp \
+			dis_keywords.cpp hex_generator.cpp \
+			text_block.cpp  api/asm8051_api.cpp  asm_extend_keywords.cpp asm_macro_keywords.cpp
 
 SRCS_COMMON= common/split.cpp common/trim.cpp common/replace.cpp common/mylog.cpp common/str2number.cpp common/number2str.cpp
 
