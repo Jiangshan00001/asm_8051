@@ -64,7 +64,7 @@ int asm_compile_file(std::string asm_file, std::string hex_file, int is_debug)
     return 0;
 }
 
-int asm_compile_str(std::string asm_str,int is_out_to_cout, int is_debug)
+std::string asm_compile_str(std::string asm_str,int is_out_to_cout, int is_debug)
 {
     replace(asm_str, "\\n", "\n");
 
@@ -76,10 +76,10 @@ int asm_compile_str(std::string asm_str,int is_out_to_cout, int is_debug)
     }
 
 
-    return 0;
+    return mout;
 }
 
-int dis_compile_str(std::string hex_str,int is_out_to_cout, int is_debug)
+std::string dis_compile_str(std::string hex_str,int is_out_to_cout, int is_debug)
 {
     replace(hex_str, "\\n", "\n");
 
@@ -89,7 +89,7 @@ int dis_compile_str(std::string hex_str,int is_out_to_cout, int is_debug)
     {
         std::cout<<mout;
     }
-    return 0;
+    return mout;
 }
 
 void translate_asm_to_hex(std::vector<std::string> &input_file, std::string parse_str, std::string output_file, bool is_debug)

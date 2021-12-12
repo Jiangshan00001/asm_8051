@@ -8,6 +8,7 @@
 #ifndef ARGSPARSER_H
 #define	ARGSPARSER_H
 
+//2020.12.4 添加函数 GetOptionInt 用于获取数值选项
 //2020.6.28 添加对引号的处理
 //2020.6.23 add iostream songjiangshan
 
@@ -15,6 +16,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <sstream>
 class ArgsParser
 {
 public:
@@ -52,7 +54,7 @@ public:
                     }
 
 
-                    m_mapArgs.insert(std::pair<char, std::string>(cOption, argv[i+1]));
+                    m_mapArgs.insert(std::pair<char, std::string>(cOption, val));
                     ++i;
                 }
                 else
@@ -77,7 +79,7 @@ public:
                 break;
             default:
                 std::cout<<"unknown arg:"<<i<<", "<<argv[i];
-                break;
+                continue;
 
             }
         }        
@@ -93,6 +95,21 @@ public:
         }
         return it->second;
     }
+    int GetOptionInt(char cOption, int default_val)
+    {
+        auto it = m_mapArgs.find(cOption);
+        if(it == m_mapArgs.end())
+        {
+            return default_val;
+        }
+        std::stringstream stri;
+        stri<<it->second;
+        int ret;
+        stri>>ret;
+        return ret;
+    }
+
+
     std::vector<std::string> GetOptionVec(char cOption)
     {
         if(is_debug)

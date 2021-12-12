@@ -1,9 +1,13 @@
+#include <assert.h>
 #include <string>
 #include <sstream>
 #include <vector>
 #include "str2number.h"
 #include "trim.h"
 #include "split.h"
+#include "mylog.h"
+
+using mylog::cdbg;
 
 float StrToFloat(std::string  mHexStr)
 {
@@ -127,6 +131,19 @@ unsigned long long StrToNumber(std::string  mHexStr)
     if(mHexStr.find(' ')!=std::string::npos)
     {
         mHexStr.substr(0, mHexStr.find(' '));
+    }
+
+    if((mHexStr.size()>2)&&(mHexStr[0]=='\''))
+    {
+        ///ascii 转数字
+        /// '12'---> (chr(1)<<8)+ chr(2)
+        assert(mHexStr.size()==3);
+        x = (unsigned int)(unsigned char)mHexStr[1];
+
+
+
+        return x;
+
     }
 
 

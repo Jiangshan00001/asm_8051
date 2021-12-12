@@ -1,13 +1,16 @@
-BUILD_DIR=../build/
+BUILD_BASE?=../../../build
+BUILD_DIR := $(BUILD_BASE)/asm8051/
 PROG=$(BUILD_DIR)asm8051.exe
 PROG_LIB=$(BUILD_DIR)asm8051.a
 
-SRCS_ASM8051_LIB= asm8051.cpp asm8051_lex.cpp asm_context.cpp \
-			asm_keywords.cpp  asm_table.cpp asm_token.cpp dis8051.cpp \
-			dis_keywords.cpp hex_generator.cpp \
-			text_block.cpp  api/asm8051_api.cpp  asm_extend_keywords.cpp asm_macro_keywords.cpp
+IMPORT_LIB=$(BUILD_DIR)../misc/misc.a
 
-SRCS_COMMON= common/split.cpp common/trim.cpp common/replace.cpp common/mylog.cpp common/str2number.cpp common/number2str.cpp
+SRCS_ASM8051_LIB= asm8051.cpp asm8051_lex.cpp asm_context.cpp \
+            asm_keywords.cpp  asm_table.cpp asm_token.cpp dis8051.cpp \
+            dis_keywords.cpp hex_generator.cpp \
+             text_block.cpp  api/asm8051_api.cpp  asm_extend_keywords.cpp asm_macro_keywords.cpp
+
+SRCS_COMMON= 
 
 SRCS_LEXYACC= lex_yacc/parser.cpp lex_yacc/scanner.cpp  lex_yacc/driver.cpp
 
@@ -29,11 +32,14 @@ CXX_FLAGS:= -g -Wall  -fpermissive -O0
 AR=ar
 STRIP=strip
 
-INCS = -I$(CURR_DIR)  -I$(CURR_DIR)/lex_yacc/   -I$(CURR_DIR)/common/ -I$(CURR_DIR)/api/
+INCS = -I$(CURR_DIR)  -I$(CURR_DIR)/lex_yacc/   -I$(CURR_DIR)/../../misc/util/ -I$(CURR_DIR)/misc/util/ -I$(CURR_DIR)/api/ -I/include/
 
 
-all:  $(BUILD_PATH) $(PROG_LIB)  $(PROG)
+all:  $(BUILD_PATH) misc $(PROG_LIB)  $(PROG)
 	echo "finish!"
+
+misc:
+	make -C misc
 
 $(BUILD_PATH):
 	mkdir -p $(BUILD_PATH)
@@ -42,20 +48,24 @@ $(SRCS_LEXYACC):
 	make -C lex_yacc
 
 $(PROG): $(OBJS)
-	$(CXX) -static -g $^  -o $@
+	@$(CXX) -static -g $^  $(IMPORT_LIB)  -o $@
 	#$(STRIP) $@
 
 $(PROG_LIB):$(PROG_LIB_OBJS)
-	$(AR) -rcs $@ $^
+	@echo ar $(PROG_LIB)
+	@$(AR) -rcs $@ $^
 
 $(BUILD_DIR)%.o:%.c
-	$(CC) $(INCS) $(CXX_FLAGS) -c $< -o $@
+	@echo compiling: $<
+	@$(CC) $(INCS) $(CXX_FLAGS) -c $< -o $@
 	
 $(BUILD_DIR)%.o:%.cc
-	$(CXX) $(INCS) $(CXX_FLAGS) -c $< -o $@
+	@echo compiling: $<
+	@$(CXX) $(INCS) $(CXX_FLAGS) -c $< -o $@
 
 $(BUILD_DIR)%.o:%.cpp
-	$(CXX) $(INCS) $(CXX_FLAGS) -c $< -o $@
+	@echo compiling: $<
+	@$(CXX) $(INCS) $(CXX_FLAGS) -c $< -o $@
 
 
 CXX_FLAGS += -MMD -MP
@@ -63,7 +73,7 @@ CXX_FLAGS += -MMD -MP
 -include $(OBJS:.o=.d)
 
 
-.PHONY: clean all 
+.PHONY: clean all  misc
 clean:
-	rm -rf $(OBJS) $(PROG_LIB) $(PROG) $(BUILD_PATH)
+	rm -rf $(OBJS) $(PROG_LIB) $(PROG)
 	make -C lex_yacc clean

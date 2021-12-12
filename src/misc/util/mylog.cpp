@@ -37,6 +37,9 @@ mylog::MyLog::MyLog(std::string prefix)
     is_c_cout = 1;
     m_is_new_line = 1;
     m_prefix=prefix;
+
+    m_line_count = 0;
+
 }
 
 mylog::MyLog::~MyLog()
@@ -53,6 +56,8 @@ void mylog::MyLog::foo(char c)
         m_is_new_line = 0;
         if(is_c_cout) std::cout<<m_prefix;
         if(m_log_stream.is_open()) m_log_stream<<m_prefix;
+
+
     }
 
     if(is_c_cout)std::cout.put(c);
@@ -62,6 +67,8 @@ void mylog::MyLog::foo(char c)
     if(c=='\n')
     {
         m_is_new_line = 1;
+
+        m_line_count++;
     }
 }
 
@@ -92,4 +99,41 @@ int mylog::MyLog::close_log_file()
 int mylog::MyLog::set_cout_output(int is_out)
 {
     is_c_cout = is_out;
+}
+
+mylog::MyLog &mylog::MyLog::print_hex(std::string istr, int num_of_one_line)
+{
+    for(unsigned i=0;i<istr.size();++i)
+    {
+        unsigned char A = istr[i];
+        unsigned char AA = ((A & 0xf0)>>4);
+        unsigned char AB = ((A & 0x0F)>>0);
+            if((i!=0) &&(i%num_of_one_line==0))
+            {
+                foo('\n');
+            }
+            else
+            {
+                foo(' ');
+            }
+        foo(char_to_hex_disp(AA));
+        foo(char_to_hex_disp(AB));
+    }
+    foo('\n');
+
+}
+
+unsigned char mylog::MyLog::char_to_hex_disp(unsigned char ia)
+{
+    if((ia>=0)&&
+            (ia<=9))
+    {
+        return ia+'0';
+    }
+    else if ((ia>=10)&&
+            (ia<=15))
+    {
+        return ia-10+'A';
+    }
+        return 'G';
 }

@@ -1,4 +1,5 @@
-BUILD_DIR=../build/
+BUILD_BASE ?=../build
+BUILD_DIR=$(BUILD_BASE)/asm8051/
 PROG=$(BUILD_DIR)asm8051.exe
 PROG_LIB=$(BUILD_DIR)asm8051.a
 
@@ -23,7 +24,7 @@ SELF_A51=$(SELF_HEX:.hex=.a51)
 DIFF_SRC=$(SRCS_A51:.a51=.diff)
 
 TMP_SRC=compile_1.txt compile_2.txt compile_3.txt compile_4.txt
-ASM8051_EXE=../build/asm8051.exe
+ASM8051_EXE=$(PROG)
 
 
 

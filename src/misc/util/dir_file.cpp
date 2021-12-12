@@ -44,6 +44,10 @@ std::string get_path(const std::string full_path_name)
         {
             file_name_without_ext=file_name_without_ext.substr(0, pos);
         }
+        else
+        {
+            return "./";
+        }
     }
     return file_name_without_ext;
 }

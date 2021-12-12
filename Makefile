@@ -1,8 +1,10 @@
 
 
 all:
-	make -C src
-	make -C test
+	make -C src BUILD_BASE=$(shell pwd)/build
+	#make -C test
+check:
+	make -C test BUILD_BASE=$(shell pwd)/build
 clean:
 	make -C src clean
-	make -C test clean
+	#make -C test clean

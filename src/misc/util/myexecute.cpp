@@ -1,6 +1,13 @@
+/// 2020.7.31 æ·»åŠ è®°å½•æ–‡ä»¶çš„æ–¹å¼
+/// 2020.8.14 add print before createprocess
+///
+///
 #include <assert.h>
+
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
 #include <windows.h>
 #include <shellapi.h>
+#endif
 
 #include "text_encode.h"
 #include "myexecute.h"
@@ -14,6 +21,8 @@ using mylog::cout;
 
 int myexecute_ansi(std::string cmd_ansi, std::string param_ansi, int wait_for_finish, std::string output_file_name)
 {
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+
     std::wstring output_file_name_w = AsciiToUnicode(output_file_name);
     std::wstring param_w = AsciiToUnicode(param_ansi);
     std::wstring cmd_w = AsciiToUnicode(cmd_ansi);
@@ -24,21 +33,10 @@ int myexecute_ansi(std::string cmd_ansi, std::string param_ansi, int wait_for_fi
 
 
     DWORD dwShareMode=FILE_SHARE_READ|FILE_SHARE_WRITE;
-#if 0
+
     SECURITY_ATTRIBUTES sa={sizeof ( sa ),NULL,TRUE};
-    SECURITY_ATTRIBUTES *psa=NULL;
-    OSVERSIONINFO osVersion={0};
-    osVersion.dwOSVersionInfoSize =sizeof ( osVersion );
-    if ( GetVersionEx ( &osVersion ) )
-    {
-        if ( osVersion.dwPlatformId ==VER_PLATFORM_WIN32_NT )
-        {
-        }
-    }
-#endif
-    SECURITY_ATTRIBUTES sa={sizeof ( sa ),NULL,TRUE};
-    //¸ù¾İ°æ±¾ÉèÖÃ¹²ÏíÄ£Ê½ºÍ°²È«ÊôĞÔ
-    // ´´½¨¼ÇÂ¼ÎÄ¼ş
+    //æ ¹æ®ç‰ˆæœ¬è®¾ç½®å…±äº«æ¨¡å¼å’Œå®‰å…¨å±æ€§
+    // åˆ›å»ºè®°å½•æ–‡ä»¶
     HANDLE hConsoleRedirect=CreateFileA (
                                 output_file_name.c_str(),
                                 GENERIC_WRITE,
@@ -58,11 +56,13 @@ int myexecute_ansi(std::string cmd_ansi, std::string param_ansi, int wait_for_fi
     s.cb = sizeof(s);
     PROCESS_INFORMATION pi={0};
     s.dwFlags =STARTF_USESHOWWINDOW|STARTF_USESTDHANDLES;
-        //Ê¹ÓÃ±ê×¼±úºÍÏÔÊ¾´°¿Ú
-    s.hStdOutput =hConsoleRedirect;//½«ÎÄ¼ş×÷Îª±ê×¼Êä³ö¾ä±ú
+        //ä½¿ç”¨æ ‡å‡†æŸ„å’Œæ˜¾ç¤ºçª—å£
+    s.hStdOutput =hConsoleRedirect;//å°†æ–‡ä»¶ä½œä¸ºæ ‡å‡†è¾“å‡ºå¥æŸ„
     s.hStdError = hConsoleRedirect;
-    s.wShowWindow =SW_HIDE;//Òş²Ø¿ØÖÆÌ¨´°¿Ú
+    s.wShowWindow =SW_HIDE;//éšè—æ§åˆ¶å°çª—å£
 
+    cout<<"EXEC:"<<cmd_a_with_param<<"\n";
+	DWORD exitCode=0;
     if ( CreateProcessA ( NULL,// no module name(use command line)
                         (char*)cmd_a_with_param.c_str(),//command line
                         NULL,//process handle not inheritable
@@ -77,12 +77,19 @@ int myexecute_ansi(std::string cmd_ansi, std::string param_ansi, int wait_for_fi
     {
         //wait unitl child process exit
         WaitForSingleObject ( pi.hProcess ,INFINITE );
-        //µÈ´ı½ø³ÌÖ´ĞĞÍê±Ï
+        //ç­‰å¾…è¿›ç¨‹æ‰§è¡Œå®Œæ¯•
+		
+		
+
+    GetExitCodeProcess(pi.hProcess, &exitCode);
         CloseHandle ( pi.hProcess );
         CloseHandle ( pi.hThread );
-        //¹Ø±Õ½ø³ÌºÍÖ÷Ïß³Ì¾ä±ú
+        //å…³é—­è¿›ç¨‹å’Œä¸»çº¿ç¨‹å¥æŸ„
     }
     CloseHandle ( hConsoleRedirect );
+	return exitCode;
+#endif
+    return 0;
 }
 
 
@@ -96,47 +103,18 @@ int myexecute_ansi_old(std::string cmd_ansi, std::string param_ansi, int wait_fo
     std::wstring cmd_uni=AsciiToUnicode(cmd_ansi);
     std::wstring param_uni = Utf8ToUnicode(param_ansi);
 
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
     ShellExecuteW(NULL, AsciiToUnicode("open").c_str(), cmd_uni.c_str(), param_uni.c_str(),NULL, SW_SHOW );
-
-#if 0
-    std::string cmd_uni=(cmd_ansi);
-    std::string param_uni = (param_ansi);
-
-    cout<<"exec:"<<cmd_ansi<<"\n";
-    cout<<"exec_param:"<<param_ansi<<"\n";
-
-
-    std::string open_cmd = ("open");
-    SHELLEXECUTEINFOA sei;
-    memset(&sei, 0, sizeof(SHELLEXECUTEINFOA));
-
-    sei.cbSize = sizeof(SHELLEXECUTEINFOA);
-    sei.fMask = SEE_MASK_NOCLOSEPROCESS;
-    sei.lpVerb =open_cmd.c_str();
-    sei.lpFile = cmd_uni.c_str();
-    sei.lpParameters = param_uni.c_str();
-    sei.nShow = SW_SHOWDEFAULT;
-    bool is_exec_success = ShellExecuteExA(&sei);
-
-    if(!is_exec_success)
-    {
-        cout<<"ERROR:exec"<<"\n";
-        cerr<<"ERROR:exec"<<"\n";
-    }
-
-    if(wait_for_finish)
-    {
-        WaitForSingleObject(sei.hProcess, INFINITE);
-    }
-
-    CloseHandle(sei.hProcess);
 #endif
+
     return 0;
 }
 
 
 int myexecute(std::string cmd_utf8, std::string param_utf8, int wait_for_finish)
 {
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+
     std::wstring cmd_uni=Utf8ToUnicode(cmd_utf8);
     std::wstring param_uni = Utf8ToUnicode(param_utf8);
 
@@ -167,5 +145,11 @@ int myexecute(std::string cmd_utf8, std::string param_utf8, int wait_for_finish)
         WaitForSingleObject(sei.hProcess, INFINITE);
     }
 
+	DWORD exitCode;
+	GetExitCodeProcess(sei.hProcess, &exitCode);
     CloseHandle(sei.hProcess);
+    return exitCode;
+
+#endif
+    return 0;
 }
