@@ -29,10 +29,9 @@ jobs:
     - name: checkout current src
       uses: actions/checkout@v2
     - name: make
-      shell: msys2 {0}
       run: |
-        make clean
-        make all
+        msys2 make clean
+        msys2 make all
 
     - name: Deploy 🚀
       uses: JamesIves/github-pages-deploy-action@4.1.7
