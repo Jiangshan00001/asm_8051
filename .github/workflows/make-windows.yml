@@ -1,0 +1,35 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: 
+    - master
+  pull_request:
+    branches: 
+    - master
+    
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - name: windows-install flex
+      run |
+      wget https://github.com/lexxmark/winflexbison/releases/download/v2.5.24/win_flex_bison-2.5.24.zip
+      #unzip x win_flex_bison-2.5.24.zip
+
+
+    - uses: actions/checkout@v2
+    - name: make
+      run: |
+        make clean
+        make all
+
+    - name: Deploy 🚀
+      uses: JamesIves/github-pages-deploy-action@4.1.7
+      with:
+        branch: bin-ubuntu # The branch the action should deploy to.
+        folder: build # The folder the action should deploy.
+        single-commit: true
