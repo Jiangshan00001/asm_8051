@@ -35,10 +35,11 @@
 %skeleton "lalr1.cc"
 
 /* namespace to enclose parser in */
-%name-prefix="asm_lex_stuff"
+/**%name-prefix="asm_lex_stuff"*/
+%define api.prefix {asm_lex_stuff}
 
 /* set the parser's class identifier */
-%define "parser_class_name" "Parser"
+%define parser_class_name {Parser}
 
 /* keep track of the current position within the input */
 %locations
