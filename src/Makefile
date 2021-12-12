@@ -39,7 +39,7 @@ all:  $(BUILD_PATH) misc $(PROG_LIB)  $(PROG)
 	echo "finish!"
 
 misc:
-	make -C misc
+	make -C misc BUILD_BASE=$(BUILD_BASE)
 
 $(BUILD_PATH):
 	mkdir -p $(BUILD_PATH)
