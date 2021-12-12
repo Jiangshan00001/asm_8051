@@ -75,6 +75,7 @@ $(BUILD_DIR)%.o:%.cc
 
 $(BUILD_DIR)%.o:%.cpp
 	@ echo compiling $<
+	@echo $(shell ls /d/a/asm_8051/asm_8051/src/misc/util)
 	$(CXX) $(INCS) $(CXX_FLAGS) -c $< -o $@
 
 
