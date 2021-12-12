@@ -19,8 +19,9 @@ jobs:
     #  run: |
     #    wget https://github.com/lexxmark/winflexbison/releases/download/v2.5.24/win_flex_bison-2.5.24.zip
     #    #unzip x win_flex_bison-2.5.24.zip
-
-    - uses: msys2/setup-msys2@v2
+    - name: setup msys2
+      uses: msys2/setup-msys2@v2
+    - name: checkout current src
     - uses: actions/checkout@v2
       with:
         install: flex bison
