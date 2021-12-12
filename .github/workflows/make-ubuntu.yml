@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name ubuntu-install flex
+    - name: ubuntu-install flex
       run: |
          apt-get install libfl-dev -y
          apt-get install flex bison
