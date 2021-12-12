@@ -41,7 +41,7 @@ CXX_FLAGS:= -g -Wall  -fpermissive
 AR=ar
 RM=rm
 RMFLAGS= -rf
-INCS = -I$(CURR_DIR)  -I$(CURR_DIR)/json_lib  -I"$(CURR_DIR)/util"  -I$(CURR_DIR)/cpp_lib
+INCS = -I$(CURR_DIR)  -I$(CURR_DIR)/json_lib  -I$(CURR_DIR)/util  -I$(CURR_DIR)/cpp_lib
 
 all: $(BUILD_PATH) $(SRCS_LEXYACC)  $(PROG_LIB)  $(PROG)
 	echo "finish!"
@@ -75,7 +75,6 @@ $(BUILD_DIR)%.o:%.cc
 
 $(BUILD_DIR)%.o:%.cpp
 	@ echo compiling $<
-	@echo $(shell ls /d/a/asm_8051/asm_8051/src/misc/util)
 	$(CXX) $(INCS) $(CXX_FLAGS) -c $< -o $@
 
 
