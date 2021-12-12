@@ -43,6 +43,13 @@
 //%define "parser_class_name" "Parser"
 %define api.parser.class {Parser}
 
+%define api.value.type { asm_token }
+%code requires {
+   #include "../asm_token.h"
+}
+
+
+
 /* keep track of the current position within the input */
 %locations
 %initial-action
@@ -57,7 +64,7 @@
 %parse-param { class driver* pdriver }
 
 /* verbose error messages */
-%error-verbose
+//%error-verbose
 %define parse.error verbose
 
  /*** BEGIN EXAMPLE - Change the example grammar's tokens below ***/
