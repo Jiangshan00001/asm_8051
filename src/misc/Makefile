@@ -75,7 +75,7 @@ $(BUILD_DIR)%.o:%.cc
 
 $(BUILD_DIR)%.o:%.cpp
 	@ echo compiling $<
-	@$(CXX) $(INCS) $(CXX_FLAGS) -c $< -o $@
+	$(CXX) $(INCS) $(CXX_FLAGS) -c $< -o $@
 
 
 CXX_FLAGS += -MMD -MP
