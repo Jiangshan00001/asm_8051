@@ -39,7 +39,9 @@
 %define api.prefix {asm_lex_stuff}
 
 /* set the parser's class identifier */
-%define parser_class_name {Parser}
+//%define parser_class_name {Parser}
+//%define "parser_class_name" "Parser"
+%define api.parser.class {Parser}
 
 /* keep track of the current position within the input */
 %locations
@@ -56,6 +58,7 @@
 
 /* verbose error messages */
 %error-verbose
+%define parse.error verbose
 
  /*** BEGIN EXAMPLE - Change the example grammar's tokens below ***/
 
