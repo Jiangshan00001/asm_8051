@@ -17,8 +17,8 @@ jobs:
     steps:
     - name: ubuntu-install flex
       run: |
-         apt-get install libfl-dev -y
-         apt-get install flex bison
+         sudo apt-get install libfl-dev -y
+         sudo apt-get install flex bison -y
 
     - uses: actions/checkout@v2
     - name: make
