@@ -10,8 +10,9 @@ include_directories(misc/util)
 include_directories(lex_yacc)
 include_directories(/include/)
  
+#patch for flexlexer.h
 include_directories(C:/MinGW/msys/1.0/include/)
-
+include_directories(..)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/lex_yacc)
 
@@ -46,9 +47,8 @@ SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -static")
 add_executable(asm8051 ${SRC_LISTA} ${SRC_LISTB} ${SRC_LISTC}  ${SRC_LISTD})
 target_link_libraries(asm8051  misc)
 target_link_libraries(asm8051  lex_yacc)
-target_link_libraries(asm8051 ${FLEX_LIBRARIES})
 
 
-install(TARGETS asm8051        )
+install(TARGETS asm8051)
 
 
