@@ -45,7 +45,7 @@ jobs:
       # Build your program with the given configuration
       run: |
           cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-          cmake --install --prefix "./bin"
+          cmake --install --prefix="./bin"
           ls
 
       
