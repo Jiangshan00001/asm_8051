@@ -33,7 +33,7 @@ nlohmann::json json_io::to_json_in(int skip_ptr)
         {
         case JSON_IO_TYPE_STD_STRING:
         {
-            std::string c_val = * (std::string *)((void*)this+m_property_addr[i]);
+            std::string c_val = * (std::string *)((unsigned long long)(void*)this+m_property_addr[i]);
             if(c_val == m_property_default_val[i].val_obj_name)
             {
                 continue;
@@ -43,7 +43,7 @@ nlohmann::json json_io::to_json_in(int skip_ptr)
             break;
         case JSON_IO_TYPE_INT:
         {
-            int c_val = * (int*)((void*)this+m_property_addr[i]);
+            int c_val = * (int*)((unsigned long long)(void*)this+m_property_addr[i]);
             if(m_property_default_val[i].val_int ==c_val)
             {
                 continue;
@@ -63,7 +63,7 @@ nlohmann::json json_io::to_json_in(int skip_ptr)
             break;
         case JSON_IO_TYPE_FLOAT:
         {
-            float c_val = * (float *)((void*)this+m_property_addr[i]);
+            float c_val = * (float *)((unsigned long long)(void*)this+m_property_addr[i]);
             if(m_property_default_val[i].val_float ==c_val)
             {
                 continue;
@@ -73,7 +73,7 @@ nlohmann::json json_io::to_json_in(int skip_ptr)
             break;
         case JSON_IO_TYPE_VECTOR_INT:
         {
-            std::vector<int>& c_val = * (std::vector<int> *)((void*)this+m_property_addr[i]);
+            std::vector<int>& c_val = * (std::vector<int> *)((unsigned long long)(void*)this+m_property_addr[i]);
             if(c_val.size()==0)
             {
                 continue;
@@ -94,7 +94,7 @@ nlohmann::json json_io::to_json_in(int skip_ptr)
             }
 
 
-            json_io **obj_c = ((json_io**)((void*)this+m_property_addr[i]));
+            json_io **obj_c = ((json_io**)((unsigned long long)(void*)this+m_property_addr[i]));
             if((*obj_c)!=NULL)
             {
                 int skip_next = skip_ptr+skip_ptr;
@@ -157,27 +157,27 @@ bool json_io::from_json_in(nlohmann::json &j)
       switch(m_property_type[index])
       {
       case JSON_IO_TYPE_STD_STRING:
-          * (std::string*)((void*)this+m_property_addr[index]) = it.value();
+          * (std::string*)((unsigned long long)(void*)this+m_property_addr[index]) = it.value();
           break;
       case JSON_IO_TYPE_INT:
           * (int*)((void*)this+m_property_addr[index]) = it.value();
           break;
       case JSON_IO_TYPE_LONG_LONG:
-          * (long long*)((void*)this+m_property_addr[index]) = it.value();
+          * (long long*)((unsigned long long)(void*)this+m_property_addr[index]) = it.value();
           break;
       case JSON_IO_TYPE_FLOAT:
-          * (float*)((void*)this+m_property_addr[index]) = it.value();
+          * (float*)((unsigned long long)(void*)this+m_property_addr[index]) = it.value();
           break;
 
       case JSON_IO_TYPE_UNSIGNED:
-            * (unsigned*)((void*)this+m_property_addr[index]) = it.value();
+            * (unsigned*)((unsigned long long)(void*)this+m_property_addr[index]) = it.value();
           break;
       case JSON_IO_TYPE_UNSIGNED_LONG:
-            * (unsigned long*)((void*)this+m_property_addr[index]) = it.value();
+            * (unsigned long*)((unsigned long long)(void*)this+m_property_addr[index]) = it.value();
           break;
       case JSON_IO_TYPE_VECTOR_INT:
       {
-          std::vector<int>& c_val = * (std::vector<int> *)((void*)this+m_property_addr[index]);
+          std::vector<int>& c_val = * (std::vector<int> *)((unsigned long long)(void*)this+m_property_addr[index]);
           for(int i=0;i<it.value().size();++i)
           {
           c_val.push_back(it.value()[i]);
@@ -189,7 +189,7 @@ bool json_io::from_json_in(nlohmann::json &j)
 
       case  JSON_IO_TYPE_OBJ:
       {
-          json_io **obj_c = ((json_io**)((void*)this+m_property_addr[index]));
+          json_io **obj_c = ((json_io**)((unsigned long long)(void*)this+m_property_addr[index]));
 
 
           if(it.value().is_null())
