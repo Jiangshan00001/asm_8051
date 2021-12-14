@@ -48,7 +48,7 @@ mylog::MyLog::MyLog()
     this->init(&m_stream_buf);
     is_c_cout = 1;
     m_is_new_line = 1;
-    m_prefix="prefix";
+    m_prefix="";
 
     m_line_count = 0;
 

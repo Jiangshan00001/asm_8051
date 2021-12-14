@@ -32,7 +32,8 @@ public:
 class MyLog :public std::ostream
 {
 public:
-    MyLog(std::string prefix="");
+    MyLog(std::string prefix);
+	MyLog();
     ~MyLog();
 
 
