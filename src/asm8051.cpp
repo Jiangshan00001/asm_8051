@@ -407,7 +407,7 @@ int asm8051::compile_start()
     m_context.m_current_address = 0;
     m_context.m_label_address.clear();
     m_context.m_preprocess_var.clear();
-
+    return 0;
 }
 
 int asm8051::compile_first()
