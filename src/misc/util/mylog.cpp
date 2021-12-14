@@ -31,7 +31,7 @@ int mylog::MyStreamBuf::overflow(int c)
 
 
 mylog::MyLog::MyLog(std::string prefix) 
-:std::ostream(this)
+:std::ostream()
 {
     m_stream_buf.m_callback = this;
     this->init(&m_stream_buf);
@@ -44,7 +44,7 @@ mylog::MyLog::MyLog(std::string prefix)
 }
 
 mylog::MyLog::MyLog() 
-:std::ostream(this)
+:std::ostream()
 {
     m_stream_buf.m_callback = this;
     this->init(&m_stream_buf);
