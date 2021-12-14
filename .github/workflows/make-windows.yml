@@ -48,7 +48,7 @@ jobs:
     - name: install
       run:  |
         cd ${{github.workspace}}/build;
-        cmake --install --prefix="../bin"
+        cmake . --install --prefix="../bin"
 
     - name: Deploy 🚀
       uses: JamesIves/github-pages-deploy-action@4.1.7
