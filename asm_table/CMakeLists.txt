@@ -1,3 +1,5 @@
+SET( CMAKE_VERBOSE_MAKEFILE on )
+
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/cmd_list.txt ${CMAKE_CURRENT_BINARY_DIR}/operand_list.txt
                    COMMAND asm_csv_to_code -t csv ${CMAKE_CURRENT_SOURCE_DIR}/dis_list.csv  ${CMAKE_CURRENT_SOURCE_DIR}/asm_list.csv ${CMAKE_CURRENT_BINARY_DIR}/cmd_list.txt ${CMAKE_CURRENT_BINARY_DIR}/operand_list.txt
 				   DEPENDS asm_csv_to_code)

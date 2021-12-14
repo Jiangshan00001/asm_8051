@@ -26,3 +26,4 @@
 *.exe
 *.out
 *.app
+winflex_bison/*
