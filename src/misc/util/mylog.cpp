@@ -42,6 +42,18 @@ mylog::MyLog::MyLog(std::string prefix)
 
 }
 
+mylog::MyLog::MyLog() 
+{
+    m_stream_buf.m_callback = this;
+    this->init(&m_stream_buf);
+    is_c_cout = 1;
+    m_is_new_line = 1;
+    m_prefix="prefix";
+
+    m_line_count = 0;
+
+}
+
 mylog::MyLog::~MyLog()
 {
 
