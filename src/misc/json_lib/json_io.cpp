@@ -53,7 +53,7 @@ nlohmann::json json_io::to_json_in(int skip_ptr)
             break;
         case JSON_IO_TYPE_LONG_LONG:
         {
-            long long c_val = * (long long *)((void*)this+m_property_addr[i]);
+            long long c_val = * (long long *)((unsigned long long)(void*)this+m_property_addr[i]);
             if(m_property_default_val[i].val_long_long ==c_val)
             {
                 continue;
@@ -160,7 +160,7 @@ bool json_io::from_json_in(nlohmann::json &j)
           * (std::string*)((unsigned long long)(void*)this+m_property_addr[index]) = it.value();
           break;
       case JSON_IO_TYPE_INT:
-          * (int*)((void*)this+m_property_addr[index]) = it.value();
+          * (int*)((unsigned long long)(void*)this+m_property_addr[index]) = it.value();
           break;
       case JSON_IO_TYPE_LONG_LONG:
           * (long long*)((unsigned long long)(void*)this+m_property_addr[index]) = it.value();
