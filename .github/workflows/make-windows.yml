@@ -31,11 +31,6 @@ jobs:
         ls
         echo "${{github.workspace}}" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-        
-      
-      
-
-
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
@@ -47,12 +42,35 @@ jobs:
 
     - name: install
       run:  |
-        cmake   --install  ${{github.workspace}}/build  --prefix="./bin"
+        cmake   --install  ${{github.workspace}}/build  --prefix="${{github.workspace}}/bin"
 
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
+      with: 
+        name: mzasm8051_bin_win
+        path: ${{github.workspace}}/bin/
+        retention-days: 30
+
+
+  deploy:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:    
+    - name: Checkout
+      uses: actions/checkout@v2.3.1
+      
+    - name: download artifacts
+      uses: actions/download-artifact@v1
+      with:
+        name: mzasm8051_bin_win
+        
+   
     - name: Deploy 🚀
       uses: JamesIves/github-pages-deploy-action@4.1.7
       with:
         branch: bin-win # The branch the action should deploy to.
-        folder: bin # The folder the action should deploy.
+        folder: 'mzasm8051_bin_win'
+        clean: true # Automatically remove deleted files from the deploy branch
         single-commit: true
-      
+
+
