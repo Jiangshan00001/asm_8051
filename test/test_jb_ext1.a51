@@ -1,0 +1,7 @@
+ORG 0H
+
+JB 0x20, LABEL1; 3 bytes
+
+ORG 82H
+LABEL1:
+DB 12 34

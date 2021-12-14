@@ -1,0 +1,8 @@
+ORG 100H
+SJMP LABELA
+;//sjmp inst 2byte
+
+ORG 182H
+LABELA:
+DB 12 34
+

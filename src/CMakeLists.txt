@@ -8,11 +8,18 @@ include_directories(.)
 include_directories(misc misc/util)
 include_directories(misc/util)
 include_directories(lex_yacc)
-include_directories(/include/)
+include_directories(lex_yacc/ly)
+include_directories(lex_yacc_adapt)
+include_directories(context)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/../asm_table)
+ 
+ 
  
 #patch for flexlexer.h
 include_directories(C:/MinGW/msys/1.0/include/)
 include_directories(..)
+include_directories(/include/)
+
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/lex_yacc)
 
@@ -31,7 +38,9 @@ aux_source_directory(. SRC_LISTA)
 aux_source_directory(api SRC_LISTB)
 aux_source_directory(lex_yacc SRC_LISTC)
 aux_source_directory(${CMAKE_CURRENT_BINARY_DIR}/lex_yacc SRC_LISTD)
-
+aux_source_directory(context SRC_LISTE)
+aux_source_directory(lex_yacc_adapt SRC_LISTF)
+aux_source_directory(lex_yacc/ly SRC_LISTG)
 
 # 添加子目录misc
 add_subdirectory(misc)
@@ -44,10 +53,10 @@ SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -static")
 
 
 
-add_executable(mzasm8051 ${SRC_LISTA} ${SRC_LISTB} ${SRC_LISTC}  ${SRC_LISTD})
+add_executable(mzasm8051 ${SRC_LISTA} ${SRC_LISTB} ${SRC_LISTC}  ${SRC_LISTD} ${SRC_LISTE} ${SRC_LISTF} ${SRC_LISTG})
 target_link_libraries(mzasm8051  misc)
 target_link_libraries(mzasm8051  lex_yacc)
-
+target_link_libraries(mzasm8051 asm_table)
 
 install(TARGETS mzasm8051)
 

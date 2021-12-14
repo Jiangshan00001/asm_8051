@@ -1,15 +1,20 @@
-BUILD_BASE ?=../build
-BUILD_DIR=$(BUILD_BASE)/asm8051/
+BUILD_DIR=../../../build/asm8051/
 PROG=$(BUILD_DIR)asm8051.exe
 PROG_LIB=$(BUILD_DIR)asm8051.a
 
-SRCS_A51=
-SRCS_A51=  asm_test1.a51 asm_test2.a51  stc8a_test1.a51 stc8a_test2.a51 stc8a_test3.a51 \
+SRCS_A51 += test_zhushi1.a51
+
+SRCS_A51 += test_jb_ext1.a51 test_jb_ext2.a51 test_jc_ext1.a51 test_jc_ext2.a51
+SRCS_A51 += test_sjmp_ext1.a51 test_sjmp_ext2.a51 test_sjmp_ext3.a51 test_sjmp_ext4.a51
+SRCS_A51 += test_predefined1.a51
+SRCS_A51 += test_sjmp1.a51 test_sjmp2.a51 test_equ_2.a51 
+SRCS_A51 += test_label_opr.a51
+
+SRCS_A51 +=  asm_test1.a51 asm_test2.a51  stc8a_test1.a51 stc8a_test2.a51 stc8a_test3.a51 \
            stc8a_test4.a51  stc8a_test5.a51 stc8a_test6.a51 stc_paomadeng.a51  
 			 
 SRCS_A51+=stc_hc595.a51 
-SRCS_A51 += test_sjmp1.a51 test_sjmp2.a51 test_equ_2.a51 
-SRCS_A51 += test_label_opr.a51
+
 #SRCS_A51 += stc_hongwai1.a51
 
 
@@ -67,6 +72,9 @@ $(ASM8051_EXE):
 
 %_self.hex:%.a51
 	$(ASM8051_EXE) -asm -d  $^  $@
+
+%_self.yy:%.a51
+	$(ASM8051_EXE) -yy -nd  $^  $@
 
 
 $(BUILD_DIR)%.o:%.cc

@@ -8,6 +8,9 @@ on:
     branches: 
     - master
     
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
 
 jobs:
   build:
@@ -21,14 +24,25 @@ jobs:
          sudo apt-get install flex bison -y
 
     - uses: actions/checkout@v2
-    - name: make
-      run: |
-        make clean
-        make all
+    
+    - name: Configure CMake
+      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+      run: cmake . -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} 
+
+    - name: Build
+      # Build your program with the given configuration
+      run:     cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - name: install
+      run:  |
+        cmake   --install  ${{github.workspace}}/build  --prefix="${{github.workspace}}/bin"
+
+    
 
     - name: Deploy 🚀
       uses: JamesIves/github-pages-deploy-action@4.1.7
       with:
         branch: bin-ubuntu # The branch the action should deploy to.
-        folder: build # The folder the action should deploy.
+        folder: bin # The folder the action should deploy.
         single-commit: true
