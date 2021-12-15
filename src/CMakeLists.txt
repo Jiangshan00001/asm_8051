@@ -49,8 +49,16 @@ add_subdirectory(lex_yacc)
 
 #aux_source_directory(. SRC_LISTA)
 #set(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=output.map" )
+#static link 
+if(MSVC)
+add_compile_options(
+	$<$<CONFIG:>:/MT>
+	$<$<CONFIG:Debug>:/MTd>
+	$<$<CONFIG:Release>:/MT>
+)
+else()
 SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -static")
-
+endif()
 
 
 add_executable(asm8051 ${SRC_LISTA} ${SRC_LISTB} ${SRC_LISTC}  ${SRC_LISTD} ${SRC_LISTE} ${SRC_LISTF} ${SRC_LISTG})
