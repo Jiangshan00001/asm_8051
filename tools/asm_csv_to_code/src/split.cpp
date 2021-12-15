@@ -7,13 +7,20 @@ std::vector<std::string>  split(std::string str, std::string token, bool remove_
        {
 
 
-           unsigned index = str.find(token);
+           std::size_t index = str.find(token);
 
-           if(index!=std::string::npos)
+           if((index!=std::string::npos)&&(index<str.size()))
            {
 
                result.push_back(str.substr(0,index));
+               if (index+token.size()<str.size())
+               {
                str = str.substr(index+token.size());
+               }
+               else
+               {
+                   str="";
+               }
                if(str.size()==0)result.push_back(str);
            }
            else
