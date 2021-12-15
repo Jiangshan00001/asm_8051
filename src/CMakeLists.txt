@@ -30,7 +30,7 @@ find_package(FLEX)
 
 
 set(CMAKE_VERBOSE_MAKEFILE OFF)
-
+set(BUILD_SHARED_LIBS OFF)
 
 #source directory
 
