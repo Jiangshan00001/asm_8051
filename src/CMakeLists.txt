@@ -53,11 +53,11 @@ SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -static")
 
 
 
-add_executable(mzasm8051 ${SRC_LISTA} ${SRC_LISTB} ${SRC_LISTC}  ${SRC_LISTD} ${SRC_LISTE} ${SRC_LISTF} ${SRC_LISTG})
-target_link_libraries(mzasm8051  misc)
-target_link_libraries(mzasm8051  lex_yacc)
-target_link_libraries(mzasm8051 asm_table)
+add_executable(asm8051 ${SRC_LISTA} ${SRC_LISTB} ${SRC_LISTC}  ${SRC_LISTD} ${SRC_LISTE} ${SRC_LISTF} ${SRC_LISTG})
+target_link_libraries(asm8051  misc)
+target_link_libraries(asm8051  lex_yacc)
+target_link_libraries(asm8051 asm_table)
 
-install(TARGETS mzasm8051)
+install(TARGETS asm8051)
 
 
