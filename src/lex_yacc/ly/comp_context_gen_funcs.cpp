@@ -1,4 +1,6 @@
 #include <assert.h>
+
+#include <algorithm>
 #include "icode.h"
 #include "comp_context.h"
 #include "token_defs.h"

@@ -1,6 +1,9 @@
 #include <assert.h>
 #include <sstream>
 #include <iostream>
+
+#include <algorithm>
+
 #include "asm_to.h"
 #include "replace.h"
 #include "comp_context.h"

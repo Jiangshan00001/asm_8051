@@ -44,14 +44,21 @@
 %parse-param { class Driver& driver }
 
 /* verbose error messages */
-%error-verbose
+//%error-verbose
+%define parse.error verbose
 
 /*** BEGIN EXAMPLE - Change the example grammar's tokens below ***/
 
             
-%name-prefix="NS_AMS8051HEX"
+//%name-prefix="NS_AMS8051HEX"
+%define api.prefix {NS_AMS8051HEX}
 
-%define "parser_class_name"  "Parser"
+//%define "parser_class_name"  "Parser"
+%define api.parser.class {Parser}
+%define api.value.type { token_defs }
+%code requires {
+#include "token_defs.h"
+}
 
 
 %token  TK_EXTERN  TK_CODE  TK_DATA  TK_BIT  TK_XDATA 
