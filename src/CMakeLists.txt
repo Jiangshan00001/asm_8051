@@ -1,22 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-#project name
-project(asm8051)
 
-
-
-set(CMAKE_VERBOSE_MAKEFILE OFF)
-set(BUILD_SHARED_LIBS OFF)
-#static link 
-if(MSVC)
-add_compile_options(
-	$<$<CONFIG:>:/MT>
-	$<$<CONFIG:Debug>:/MTd>
-	$<$<CONFIG:Release>:/MT>
-)
-else()
-SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -static")
-endif()
 
 
 #head file path
