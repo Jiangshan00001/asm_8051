@@ -5,15 +5,17 @@ A 8051 asm to hex assembly compiler. The purpose of the compiler is to learn how
 it should work with https://github.com/Jiangshan00001/llvm-mcs51-backend project in the future.
 
 
+
+TODO:
+# add cmake test 
+# add tools for flex/yacc
+
+
 =====================
 编译流程：
 
 源程序-->预处理（去除注释，拆分单词,组合指令）-(dbg1)->
 			第一遍处理(处理宏定义，生成指令，生成标签列表)-(dbg2)->标签添加(各地址指令里，标签替换)-(dbg3)->第二遍处理(重新生成地址相关指令)-(dbg4)->hex文件
-
-
-
-
 
 
 
@@ -86,6 +88,10 @@ DB 在指令中实现 m_line_key_word_ptr
 
 ===================================================
 历史记录：
+2021.12.15
+
+添加cmake编译
+
 
 2020.7.15
 disassmble中m3.csv的错误修正：
