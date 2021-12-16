@@ -46,25 +46,53 @@ asm_table/operand_list.csv ->used for both.
 
 
 
+===================================================
+
+```
+如何添加新的指令 USING 0
+1 scanner.ll中添加
+"USING" {TOKEN_DEFAULT_AC( token::TK_MACRO,1,0);}
+"SHL"   { TOKEN_DEFAULT_AC( token::TK_SHL,1,0);}
+"MOD"   { TOKEN_DEFAULT_AC( token::TK_MOD,1,0);}
+2 parser.yy中添加 TK_SHL  TK_MOD
+
+3 parser.yy中添加解析规则
+TK_SHL 和 TK_MOD 都放在 not_expr中即可
+| expr_elem TK_MOD expr_elem {
+		$$.type=TOKEN_PARENT;
+		$$.child_type=TOKEN_OPR;
+		$$.val_str= $1.val_str +" MOD " + $3.val_str;
+		$1.type=TOKEN_OPR;
+		$$.m_childs.push_back($1);
+		$$.m_childs.push_back($2);
+		$$.m_childs.push_back($3);
+		$$.m_resolved=0;
+	}
+
+4 
+T_ASM_CONTEXT::eval_token 函数中，添加  SHL MOD 两个算符的实现
+USING 在宏定义中实现 m_line_macro_ptr
+DB 在指令中实现 m_line_key_word_ptr
+```
+
+
+===================================================
+
+
+Features:
+
+```
+测试自动化  -ctest
+$的运算 sjmp $+4
+
+```
+
 
 TODO:
-# add cmake test 
-# add tools for flex/yacc
 
+```
 
-=====================
-编译流程：
-
-源程序-->预处理（去除注释，拆分单词,组合指令）-(dbg1)->
-			第一遍处理(处理宏定义，生成指令，生成标签列表)-(dbg2)->标签添加(各地址指令里，标签替换)-(dbg3)->第二遍处理(重新生成地址相关指令)-(dbg4)->hex文件
-
-
-
-
-
-
-
-TODO:
+add tools for flex/yacc
 
 汇编器中加入链接功能：
     支持多个汇编文件输入，生成hex
@@ -90,49 +118,18 @@ TODO:
 
 
 
-
-
-
-测试自动化  -make--XXX
 不支持的语法：
-1 c语言的多行注释： /**/
-2 $的运算 sjmp $+4---XXX
+
 3 PUSH/POP AR5 AR4 AR7
+1 c语言的多行注释： /**/
 
 
+```
 
 
-
-
-
-===================================================
-如何添加新的指令 USING 0
-1 scanner.ll中添加
-"USING" {TOKEN_DEFAULT_AC( token::TK_MACRO,1,0);}
-"SHL"   { TOKEN_DEFAULT_AC( token::TK_SHL,1,0);}
-"MOD"   { TOKEN_DEFAULT_AC( token::TK_MOD,1,0);}
-2 parser.yy中添加 TK_SHL  TK_MOD
-
-3 parser.yy中添加解析规则
-TK_SHL 和 TK_MOD 都放在 not_expr中即可
-| expr_elem TK_MOD expr_elem {
-		$$.type=TOKEN_PARENT;
-		$$.child_type=TOKEN_OPR;
-		$$.val_str= $1.val_str +" MOD " + $3.val_str;
-		$1.type=TOKEN_OPR;
-		$$.m_childs.push_back($1);
-		$$.m_childs.push_back($2);
-		$$.m_childs.push_back($3);
-		$$.m_resolved=0;
-	}
-
-4 
-T_ASM_CONTEXT::eval_token 函数中，添加  SHL MOD 两个算符的实现
-USING 在宏定义中实现 m_line_macro_ptr
-DB 在指令中实现 m_line_key_word_ptr
-
-===================================================
 历史记录：
+
+```
 2021.12.15
 
 添加cmake编译
@@ -281,31 +278,26 @@ TODO: cc500
 
 2020.4.5
 1 添加代码自动生成--根据m2添加公式后。
-
-TODO:
-1 添加label系统。在每行处理时，如果发现有label, 则追加一个text_block单独用于label.
-2 添加define宏定义
-3 添加EQU 宏定义？？？
-4 添加DS DBIT定义？
-5 添加 SEGMENT定义？？？
-6 移植8cc到此处...
-7 移植编辑器textadept
-8 网站推广
-9 年付费？？？
-
-
-
-
-
-
-
-
 1 试用pdcurses（textadept补丁可加？） 生成编辑器???
-
-
-
-
-
 1 解码if（）后面的数字，改为TOKEN_等定义字符串
 2 添加人工解码函数，人工代码和自动生成的类型检查代码分离
-3 c语言移植 c88
+3 c语言移植 c88？？
+
+
+```
+
+
+
+=====================
+
+编译流程：
+
+源程序-->预处理（去除注释，拆分单词,组合指令）-(dbg1)->
+			第一遍处理(处理宏定义，生成指令，生成标签列表)-(dbg2)->标签添加(各地址指令里，标签替换)-(dbg3)->第二遍处理(重新生成地址相关指令)-(dbg4)->hex文件
+
+
+
+
+
+
+
