@@ -6,26 +6,33 @@ it should work with https://github.com/Jiangshan00001/llvm-mcs51-backend project
 
 
 # current status:
+
+```
 it works for many files.
 I added 100+ test files in test folder and the compiler could passes all the test.
 If you find a bug, tell me.
-
+```
 
 
 # download:
 
+```
 we could download the bin file:
 win:    https://github.com/Jiangshan00001/asm_8051/tree/bin-win/bin/asm8051.exe
 ubuntu: https://github.com/Jiangshan00001/asm_8051/blob/bin-ubuntu/bin/asm8051
 or download the src https://github.com/Jiangshan00001/asm_8051
 and build using cmake.
+```
 
 # how to use:
 
+```
 asm->hex:
 asm8051 -asm -nd asm_file_input.a51 hex_file_output.hex
 hex->asm:
 asm8051 -dis -nd hex_file_input.hex asm_file_output.a51 
+```
+
 
 # arch:
 
