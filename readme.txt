@@ -5,6 +5,40 @@ A 8051 asm to hex assembly compiler. The purpose of the compiler is to learn how
 it should work with https://github.com/Jiangshan00001/llvm-mcs51-backend project in the future.
 
 
+# current status:
+it works for many files.
+I added 100+ test files in test folder and the compiler could passes all the test.
+If you find a bug, tell me.
+
+
+
+# download:
+
+we could download the bin file:
+win:    https://github.com/Jiangshan00001/asm_8051/tree/bin-win/bin/asm8051.exe
+ubuntu: https://github.com/Jiangshan00001/asm_8051/blob/bin-ubuntu/bin/asm8051
+or download the src https://github.com/Jiangshan00001/asm_8051
+and build using cmake.
+
+# how to use:
+
+asm->hex:
+asm8051 -asm -nd asm_file_input.a51 hex_file_output.hex
+hex->asm:
+asm8051 -dis -nd hex_file_input.hex asm_file_output.a51 
+
+# arch:
+
+```
+three csv table is used for code generate.
+asm_table/asm_list.csv ->used for asm to hex.
+asm_table/dis_list.csv ->used for hex to asm.
+asm_table/operand_list.csv ->used for both.
+```
+
+
+
+
 
 TODO:
 # add cmake test 
@@ -16,6 +50,10 @@ TODO:
 
 源程序-->预处理（去除注释，拆分单词,组合指令）-(dbg1)->
 			第一遍处理(处理宏定义，生成指令，生成标签列表)-(dbg2)->标签添加(各地址指令里，标签替换)-(dbg3)->第二遍处理(重新生成地址相关指令)-(dbg4)->hex文件
+
+
+
+
 
 
 
