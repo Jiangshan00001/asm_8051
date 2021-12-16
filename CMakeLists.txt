@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
 #project name
-project(asm8051)
+project(asm8051 VERSION 3.0)
 
 
 SET( CMAKE_VERBOSE_MAKEFILE on )

@@ -42,7 +42,6 @@ jobs:
 
     - name: install
       run:  |
-        C:/msys64/usr/bin/mkdir.exe -p ${{github.workspace}}/bin
         cmake   --install  ${{github.workspace}}/build  --prefix="${{github.workspace}}/bin" --config ${{env.BUILD_TYPE}}
 
     - name: Upload Artifacts

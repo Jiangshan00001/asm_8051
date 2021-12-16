@@ -1,13 +1,15 @@
 find_package(BISON)
 find_package(FLEX)
 
-include_directories(C:/MinGW/msys/1.0/include/)
+#include_directories(C:/MinGW/msys/1.0/include/)
 include_directories(.)
 include_directories(../lex_yacc_adapt)
 include_directories(../context)
 include_directories(./ly)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+# patch for local machine
+include_directories(${CMAKE_SOURCE_DIR}/winflex_bison)
 
 
 
