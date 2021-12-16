@@ -1,6 +1,6 @@
 
 
-A 8051 asm to hex assembly compiler. The purpose of the compiler is to learn how to write a compiler myself.
+A 8051 asm to hex assembly compiler. 
 
 The key feature is writing as less code as possible, using the csv table to generate code automaticly.
 
