@@ -14,7 +14,7 @@ public:
     unsigned long m_address;
     unsigned char m_crc;///此变量在读出的文件中是填写好的。在要写入文件时，此变量不需要用户计算
 
-    // 重载 + 运算符，用于把两个 Box 对象相加
+    // 重载 < 运算符，用于两个 hex_block比较起始地址
     bool operator <(hex_block &b);
 };
 
@@ -24,8 +24,9 @@ bool hex_block_cmp(hex_block a, hex_block b);
 
 
 
-
+///传入hex文件内容，返回hexblock的列表
 std::vector<hex_block> hex_file_to_hex_data(std::string hex_file_data);
+/// 传入hexblock的列表，返回hex文件内容
 std::string hex_data_to_hex_file(std::vector<hex_block> hex_data);
 
 /// 0x23---> "23"

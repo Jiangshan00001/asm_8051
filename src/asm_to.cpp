@@ -55,7 +55,7 @@ int asm_to::add_src(std::string code_src, std::string file_name)
     //driver.trace_parsing = 1;
     //driver.trace_scanning = 1;
     //bool result =
-            driver.parse_stream(istr, file_name);
+    driver.parse_stream(istr, file_name);
 
     m_top_icode = calc.m_top_icode;
 
@@ -135,7 +135,7 @@ int asm_to::visitor_ic(icode *ic)
         /// 此处进行命令的翻译
         ///
         int asm_to_status = get_asm_to_bin(cmd_name,opr_cnt, opr_type[0],opr_val[0],
-        opr_type[1], opr_val[1],opr_type[2], opr_val[2], m_address, mhb.m_bin);
+                opr_type[1], opr_val[1],opr_type[2], opr_val[2], m_address, mhb.m_bin);
 
         ///----------------------------------
         ///

@@ -27,3 +27,4 @@
 *.out
 *.app
 winflex_bison/*
+build/*

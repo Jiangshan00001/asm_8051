@@ -18,7 +18,7 @@ to_asm::to_asm()
 int to_asm::hex_to_code1(std::string &hex_format_str)
 {
     std::vector<hex_block> ihex_block =
-    hex_file_to_hex_data(hex_format_str);
+            hex_file_to_hex_data(hex_format_str);
 
 
     cdbg<<ihex_block.size()<<"\n";
@@ -101,7 +101,6 @@ std::string to_asm::add_hex_str(std::string hex_format_str)
 
     hex_to_code1(hex_format_str);
     return hex_to_code2();
-
 }
 
 
